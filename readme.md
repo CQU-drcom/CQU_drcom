@@ -7,3 +7,17 @@
 
 #### 2.使用方法
 
+1. [下载此配置包](https://github.com/purefkh/CQU_drcom/releases/)，并解压
+
+2. 使用 `scp工具` 将 __解压后的文件夹__ 上传到路由器的 `/tmp/` 路径下
+
+3. 使用 `putty` 等ssh工具，登录你的路由器
+
+4. 在 `putty` 中执行以下命令
+
+   ``` bash
+   cd /tmp/CQU_drcom
+   sh setup.sh
+   ```
+
+5. 享受路由器吧
