@@ -69,7 +69,7 @@ s.bind((bind_ip, 61440))
 
 s.settimeout(3)
 SALT = ''
-IS_TEST = True
+IS_TEST = False
 # specified fields based on version
 CONF = "/etc/drcom.conf"
 UNLIMITED_RETRY = True

@@ -19,10 +19,10 @@ then
     echo `date`  "......OK......" >> ${log}
 else
     echo `date` "......Failed......" >> ${log}
-    ps | grep "timeout, retrying" ~/drcom.log | grep -v grep
+    ps | grep "timeout, retrying" ${dr_log} | grep -v grep
     if [ $? -eq 0 ]
     then
-        echo $NULL > ~/drcom.log
+        echo $NULL > ${dr_log}
         echo `date` "......timeout......" >> ${log}
         reboot
     fi
