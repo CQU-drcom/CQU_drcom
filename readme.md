@@ -5,6 +5,7 @@
 - 适用于重庆大学AB校区及虎溪校区
 - 仅在Pandora Box上测试通过，请自行百度刷机方法
 - 本配置包集成了检测网络连接的功能
+- 配置包中的 `latest-wired_ab.py` 和 `latest-wired_d.py` 填写账号密码，并将 `IS_TEST = False` 改为 `IS_TEST = True` 后可直接在电脑上使用
 
 #### 2.使用方法
 
