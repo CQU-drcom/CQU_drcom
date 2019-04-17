@@ -16,7 +16,8 @@ fi
 ping -c 1 baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-    echo `date`  "......OK......" >> ${log}
+    echo `date`  "......OK......" > ${log}
+    echo $NULL > ${dr_log}
 else
     echo `date` "......Failed......" >> ${log}
     ps | grep "timeout, retrying" ${dr_log} | grep -v grep

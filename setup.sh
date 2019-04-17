@@ -67,7 +67,7 @@ crontab mycron
 
 echo "Network checking..."
 python /usr/bin/drcom > ~/drcom.log &
-sleep 2s
+sleep 10s
 ping -c 1 baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
