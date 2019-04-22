@@ -19,7 +19,7 @@ then
     echo `date`  "......OK......" > ${log}
     echo $NULL > ${dr_log}
 else
-    echo `date` "......Failed......" >> ${log}
+    echo `date` "......Failed......" > ${log}
     ps | grep "timeout, retrying" ${dr_log} | grep -v grep
     if [ $? -eq 0 ]
     then

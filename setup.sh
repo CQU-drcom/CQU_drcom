@@ -30,14 +30,17 @@ echo "2.D"
 read -p "Please enter your campus: " choice
 case $choice in
 1)
+    echo ""
     echo "You chose campus AB"
     cp -p latest-wired_ab.py drcom
     cp -p drcom_ab.conf drcom.conf;;
 2)
+    echo ""
     echo "You chose campus D"
     cp -p latest-wired_d.py drcom
     cp -p drcom_d.conf drcom.conf;;
 *)
+    echo ""
     echo "Errors! Please run the program again."
     exit 0;;
 esac
@@ -65,6 +68,7 @@ echo "Set up cron..."
 crontab mycron
 /etc/init.d/cron restart
 
+# Network Checking and Remove Setup Files
 echo "Network checking..."
 python /usr/bin/drcom > ~/drcom.log &
 sleep 10s
@@ -84,6 +88,21 @@ else
     echo "Failed... Please contact me."
     exit 0
 fi
+
+# Change WIFI Passwprd
+read -p "Change your WIFI password...(Y /N)" ifChange
+case $ifChange in
+Y | y)
+    read -p "Pleasr enter your new WIFI password: " wifi_password
+    uci set wireless.@wifi-iface[0].encryption=psk2
+    uci set wireless.@wifi-iface[1].encryption=psk2
+    uci set wireless.@wifi-iface[0].key=$wifi_password
+    uci set wireless.@wifi-iface[1].key=$wifi_password
+    wifi;;
+*)
+    echo "";;
+esac
+
 sleep 1s
 
 echo "It is OK. Enjoy!"
