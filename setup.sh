@@ -98,7 +98,8 @@ Y | y)
     uci set wireless.@wifi-iface[1].encryption=psk2
     uci set wireless.@wifi-iface[0].key=$wifi_password
     uci set wireless.@wifi-iface[1].key=$wifi_password
-    wifi;;
+    wifi
+    uci commit;;
 *)
     echo "";;
 esac
