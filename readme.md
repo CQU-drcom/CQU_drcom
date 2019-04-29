@@ -9,7 +9,7 @@
 
 #### 2.使用方法
 
-1. [下载此配置包](https://github.com/purefkh/CQU_drcom/releases/)，并解压
+1. [下载此配置包](https://github.com/purefkh/CQU_drcom/archive/master.zip)，并解压
 
 2. 使用 `scp工具` 将 __解压后的文件夹__ 上传到路由器的 `/tmp/` 路径下
 
