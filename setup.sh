@@ -1,59 +1,122 @@
 #! /usr/bin/sh
 
-conf=/etc/drcom.conf
-drcom=/usr/bin/drcom
+
+CONFIG=drcom.conf
+DRCOM=latest-wired.py
+pkgname=drcom
+DR_PATH=/usr/bin
+CO_PATH=/etc
 
 uname -a | grep PandoraBox | grep -v grep
+
 if [ $? -ne 0 ]
 then
     echo "Not PandoraBox, exit..."
     exit 0
 fi
-
+clear
 echo "Welcome to use CQU_drcom setup program."
 
 sleep 1s
-# passwd
 
-if [ -f ${conf} ]
+# remove old file
+
+if [ -f $CO_path/$CONFIG ]
 then
-    mv /etc/drcom.conf /etc/drcom.conf.save
+    cd $CO_PATH
+    mv $CONFIG $CONFIG.save
 fi
-if [ -f ${drcom} ]
+if [ -f $DR_PATH/$pkgname ]
 then
-    mv /usr/bin/drcom /usr/bin/drcom.save
+    cd $DR_PATH
+    mv $pkgname $pkgname.save
 fi
+
+# change root passwd
+
+echo ""
+read -p "Change your root password? (For security it will show nothing when you enter.) [Y/n]:" rootpasswd
+case $rootpasswd in
+Y|y|"")
+	passwd root;;
+N|n)
+	break;;
+clear
+esac
+
+#Gether information
 
 echo ""
 echo "1.A or B"
 echo "2.D"
-read -p "Please enter your campus: " choice
-case $choice in
+
+read -p "Please enter your campus: " CHOICE
+case $CHOICE in
 1)
     echo ""
     echo "You chose campus AB"
-    cp -p latest-wired_ab.py drcom
-    cp -p drcom_ab.conf drcom.conf;;
+    campus=ab;;
 2)
     echo ""
     echo "You chose campus D"
-    cp -p latest-wired_d.py drcom
-    cp -p drcom_d.conf drcom.conf;;
+    campus=d;;
 *)
     echo ""
     echo "Errors! Please run the program again."
     exit 0;;
 esac
 
-read -p "Please enter your username: " username
-sed -i "s/username=''/username=\'$username\'/g" drcom.conf
-read -p "Please enter your password: " password
-sed -i "s/password=''/password=\'$password\'/g" drcom.conf
+# change username and passwd
+read -p "Please enter your Student number: " username
+read -s -p "Please enter your password: " password
+# Crontab setting confirm
+read -p "Set up cron? [Y|N]" ifSet
 
+# Change WIFI Passwprd
+read -p "Change your WIFI password? [Y/N]: " ifChange
+read -p "Please enter your new WIFI password: " wifi_password
+
+# Information recheck
+clear
+echo "Your campus:"
+echo $campus
+echo "Your Student number:"
+echo $username
+echo "Your password:"
+echo $password
+echo "Change WIFI password:"
+echo $ifChange
+case $ifChange in
+Y | y|"")
+    echo "Your new password will be:"
+    echo $wifi_password;;
+N|n|*)
+    break;;
+esac
+echo "Crontab:"
+echo $ifSet
+echo ""
+read -p "Is the above information right? [Y/N]" solution
+case $solution in
+Y|y)
+        echo "Good!";;
+N|n)
+        echo "Rerun setup.sh!"
+        exit 0;;
+*)
+        echo "invalid input! Rerun."
+        exit 0;;
+esac
+read -s -n1 -p "Press any key to continue installation... "
+
+
+
+mv $DRCOM $pkgname
+cp -p $pkgname_$campus.conf  $CONFIG
+sed -i "s/username=''/username=\'$username\'/g" $CONFIG
+sed -i "s/password=''/password=\'$password\'/g" $CONFIG
 echo "Install python-mini..."
-opkg install zlib_1.2.8-1_ralink.ipk
-opkg install python-mini_2.7.3-2_ralink.ipk
-
+opkg install zlib_1.2.8-1_ralink.ipk python-mini_2.7.3-2_ralink.ipk
 echo "Set up scripts..."
 chmod +x *.sh
 chmod +x *drcom
@@ -64,25 +127,27 @@ cp -p drcom.conf /etc/
 sleep 1s
 echo "Almost done!"
 
-echo "Set up cron..."
-crontab mycron
-/etc/init.d/cron restart
-python /usr/bin/drcom > ~/drcom.log &
-sleep 1s
+case $ifSet in
+Y|y)
+        echo "Set up cron..."
+        crontab mycron
+        /etc/init.d/cron restart
+        python /usr/bin/drcom > ~/drcom.log &
+        sleep 1s;;
+N|n)
+        break;;
 
-# Change WIFI Passwprd
-read -p "Change your WIFI password...(Y /N)" ifChange
 case $ifChange in
-Y | y)
-    read -p "Please enter your new WIFI password: " wifi_password
+Y | y|"")
     uci set wireless.@wifi-iface[0].encryption=psk2
     uci set wireless.@wifi-iface[1].encryption=psk2
     uci set wireless.@wifi-iface[0].key=$wifi_password
     uci set wireless.@wifi-iface[1].key=$wifi_password
     wifi
     uci commit;;
-*)
-    echo "";;
+N|n|*)
+    echo "password will leave empty"
+    break;;
 esac
 
 # Network Checking and Remove Setup Files
@@ -99,5 +164,5 @@ fi
 
 
 sleep 1s
-
+clear
 echo "It is OK. Enjoy!"
