@@ -45,9 +45,9 @@ case $choice in
     exit 0;;
 esac
 
-read -p "Pleasr enter your username: " username
+read -p "Please enter your username: " username
 sed -i "s/username=''/username=\'$username\'/g" drcom.conf
-read -p "Pleasr enter your password: " password
+read -p "Please enter your password: " password
 sed -i "s/password=''/password=\'$password\'/g" drcom.conf
 
 echo "Install python-mini..."
@@ -67,33 +67,14 @@ echo "Almost done!"
 echo "Set up cron..."
 crontab mycron
 /etc/init.d/cron restart
-
-# Network Checking and Remove Setup Files
-echo "Network checking..."
 python /usr/bin/drcom > ~/drcom.log &
-sleep 10s
-ping -c 1 baidu.com > /dev/null 2>&1
-if [ $? -eq 0 ]
-then
-    echo "OK..."
-    ls
-    read -p "Remove these files... (Y /N)" option
-    case $option in
-    Y | y)
-        rm -rf ../CQU_drcom;;
-    *)
-        echo "Not remove";;
-    esac
-else
-    echo "Failed... Please contact me."
-    exit 0
-fi
+sleep 1s
 
 # Change WIFI Passwprd
 read -p "Change your WIFI password...(Y /N)" ifChange
 case $ifChange in
 Y | y)
-    read -p "Pleasr enter your new WIFI password: " wifi_password
+    read -p "Please enter your new WIFI password: " wifi_password
     uci set wireless.@wifi-iface[0].encryption=psk2
     uci set wireless.@wifi-iface[1].encryption=psk2
     uci set wireless.@wifi-iface[0].key=$wifi_password
@@ -104,7 +85,19 @@ Y | y)
     echo "";;
 esac
 
+# Network Checking and Remove Setup Files
+echo "Network checking..."
+sleep 10s
+ping -c 1 baidu.com > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    echo "OK..."
+else
+    echo "Failed... Please contact me."
+    exit 0
+fi
+
+
 sleep 1s
 
 echo "It is OK. Enjoy!"
-
