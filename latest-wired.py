@@ -10,24 +10,6 @@ import os
 import random
 import traceback
 
-# CONFIG
-server = '10.254.7.4'
-username=''
-password=''
-CONTROLCHECKSTATUS = '\x20'
-ADAPTERNUM = '\x01'
-host_ip = '10.253.178.14'
-IPDOG = '\x01'
-host_name = 'GILIGILIEYE'
-PRIMARY_DNS = '8.8.8.8'
-dhcp_server = '10.253.7.7'
-AUTH_VERSION = '\x09\x00'
-mac = 0xb025aa227d6b
-host_os = 'NOTE7'
-KEEP_ALIVE_VERSION = '\xdc\x02'
-ror_version = False
-# CONFIG_END
-
 keep_alive1_mod = False #If you have trouble at KEEPALIVE1, turn this value to True
 nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
 bind_ip = '0.0.0.0'
