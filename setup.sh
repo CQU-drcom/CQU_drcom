@@ -11,8 +11,8 @@ uname -a | grep PandoraBox | grep -v grep
 
 if [ $? -ne 0 ]
 then
-    echo "Not PandoraBox, exit..."
-    exit 0
+   echo "Not PandoraBox, exit..."
+   exit 0
 fi
 clear
 echo "Welcome to use CQU_drcom setup program."
@@ -34,7 +34,6 @@ fi
 
 # change root passwd
 
-echo ""
 read -p "Change your root password? (For security it will show nothing when you enter.) [Y/n]:" rootpasswd
 case $rootpasswd in
 Y|y|"")
@@ -72,6 +71,12 @@ read -p "Please enter your Student number: " username
 read -p "Please enter your password: " password
 # Crontab setting confirm
 read -p "Set up cron? [Y|N]" ifSet
+if  [[ $ifSet != "Y" | $ifSet != "N" ]]
+then
+            clear
+            echo "invalid input"
+            read -p "Set up cron? [Y|N]" ifSet
+fi
 
 # Change WIFI Passwprd
 read -p "Change your WIFI password? [Y/N]: " ifChange
@@ -91,7 +96,7 @@ echo $password
 echo "Change WIFI password:"
 echo $ifChange
 case $ifChange in
-Y | y|"")
+Y|y|"")
     echo "Your new password will be:"
     echo $wifi_password;;
 N|n|*)
@@ -111,12 +116,10 @@ N|n)
         echo "invalid input! Rerun."
         exit 0;;
 esac
-read -s -n1 -p "Press any key to continue installation... "
-
-
+read -n1 -p "Press any key to continue installation... "
 
 mv $DRCOM $pkgname
-cp -p $pkgname_$campus.conf  $CONFIG
+cp -p $pkgname\_$campus.conf  $CONFIG
 sed -i "s/username=''/username=\'$username\'/g" $CONFIG
 sed -i "s/password=''/password=\'$password\'/g" $CONFIG
 echo "Install python-mini..."
@@ -133,39 +136,38 @@ echo "Almost done!"
 
 case $ifSet in
 Y|y)
-        echo "Set up cron..."
-        crontab mycron
-        /etc/init.d/cron restart
-        python /usr/bin/drcom > ~/drcom.log &
-        sleep 1s;;
+       echo "Set up cron..."
+       crontab mycron
+       /etc/init.d/cron restart
+       python /usr/bin/drcom > ~/drcom.log &
+       sleep 1s;;
 N|n)
-        break;;
+       break;;
 
 case $ifChange in
-Y | y|"")
-    uci set wireless.@wifi-iface[0].encryption=psk2
-    uci set wireless.@wifi-iface[1].encryption=psk2
-    uci set wireless.@wifi-iface[0].key=$wifi_password
-    uci set wireless.@wifi-iface[1].key=$wifi_password
-    wifi
-    uci commit;;
+Y|y|"")
+   uci set wireless.@wifi-iface[0].encryption=psk2
+   uci set wireless.@wifi-iface[1].encryption=psk2
+   uci set wireless.@wifi-iface[0].key=$wifi_password
+   uci set wireless.@wifi-iface[1].key=$wifi_password
+   wifi
+   uci commit;;
 N|n|*)
-    echo "password will leave empty"
-    break;;
+   echo "password will leave empty"
+   break;;
 esac
 
-# Network Checking and Remove Setup Files
+Network Checking and Remove Setup Files
 echo "Network checking..."
 sleep 10s
 ping -c 1 baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-    echo "OK..."
+   echo "OK..."
 else
-    echo "Failed... Please contact me."
-    exit 0
+   echo "Failed... Please contact me."
+   exit 0
 fi
-
 
 sleep 1s
 clear
