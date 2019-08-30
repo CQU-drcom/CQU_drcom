@@ -34,7 +34,7 @@ fi
 
 # change root passwd
 
-read -p "Change your root password? (For security it will show nothing when you enter.) [Y/n]:" rootpasswd
+read -p "Change your root password? (For security it will show nothing when you enter.) [Y|N]:" rootpasswd
 case $rootpasswd in
 Y|y|"")
 	passwd root;;
@@ -70,13 +70,10 @@ esac
 read -p "Please enter your Student number: " username
 read -p "Please enter your password: " password
 # Crontab setting confirm
+echo ""
+cat mycron
+echo ""
 read -p "Set up cron? [Y|N]" ifSet
-if  [[ $ifSet != "Y" | $ifSet != "N" ]]
-then
-            clear
-            echo "invalid input"
-            read -p "Set up cron? [Y|N]" ifSet
-fi
 
 # Change WIFI Passwprd
 read -p "Change your WIFI password? [Y/N]: " ifChange
@@ -108,15 +105,16 @@ echo ""
 read -p "Is the above information right? [Y/N]" solution
 case $solution in
 Y|y)
-        echo "Good!";;
+    echo "Good!";;
 N|n)
-        echo "Rerun setup.sh!"
-        exit 0;;
+    echo "Rerun setup.sh!"
+    exit 0;;
 *)
-        echo "invalid input! Rerun."
-        exit 0;;
+    echo "invalid input! Rerun."
+    exit 0;;
 esac
 read -n1 -p "Press any key to continue installation... "
+echo ""
 
 mv $DRCOM $pkgname
 cp -p $pkgname\_$campus.conf  $CONFIG
@@ -136,13 +134,13 @@ echo "Almost done!"
 
 case $ifSet in
 Y|y)
-       echo "Set up cron..."
-       crontab mycron
-       /etc/init.d/cron restart
-       python /usr/bin/drcom > ~/drcom.log &
-       sleep 1s;;
+    echo "Set up cron..."
+    crontab mycron
+    /etc/init.d/cron restart
+    sleep 1s;;
 N|n)
-       break;;
+    ;;
+esac
 
 case $ifChange in
 Y|y|"")
@@ -153,11 +151,11 @@ Y|y|"")
    wifi
    uci commit;;
 N|n|*)
-   echo "password will leave empty"
-   break;;
+   echo "password will leave empty";;
 esac
 
-Network Checking and Remove Setup Files
+# Network Checking and Remove Setup Files
+sh /usr/bin/networkChecking.sh
 echo "Network checking..."
 sleep 10s
 ping -c 1 baidu.com > /dev/null 2>&1
