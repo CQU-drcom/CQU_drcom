@@ -75,7 +75,7 @@ read -p "Set up cron? [Y|N]" ifSet
 
 # Change WIFI Passwprd
 read -p "Change your WIFI password? [Y/N]: " ifChange
-if [[ $ifChange -eq "Y" ]]
+if [[ $ifChange == "Y" ]]
 then
 	read -p "Please enter your new WIFI password: " wifi_password
 fi
