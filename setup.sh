@@ -70,14 +70,10 @@ esac
 read -p "Please enter your Student number: " username
 read -p "Please enter your password: " password
 # Crontab setting confirm
-<<<<<<< HEAD
 echo ""
 cat mycron
 echo ""
 read -p "Set up cron? [Y|N]" ifSet
-=======
-read -p "Set up cron?(input one of Y,y,N,n) [Y|N]" ifSet
->>>>>>> dba2f7cf5e6ff7a9fd5136032ed9ccdade7210c7
 
 # Change WIFI Passwprd
 read -p "Change your WIFI password? [Y/N]: " ifChange
@@ -147,21 +143,15 @@ N|n)
 esac
 
 case $ifChange in
-Y|y)
+Y|y|"")
    uci set wireless.@wifi-iface[0].encryption=psk2
    uci set wireless.@wifi-iface[1].encryption=psk2
    uci set wireless.@wifi-iface[0].key=$wifi_password
    uci set wireless.@wifi-iface[1].key=$wifi_password
    wifi
    uci commit;;
-<<<<<<< HEAD
 N|n|*)
    echo "password will leave empty";;
-=======
-N|n)
-   echo "password will leave empty"
-   break;;
->>>>>>> dba2f7cf5e6ff7a9fd5136032ed9ccdade7210c7
 esac
 
 # Network Checking and Remove Setup Files
