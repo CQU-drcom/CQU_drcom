@@ -1,4 +1,4 @@
-#! /usr/bin/sh
+#!/usr/bin/sh
 
 
 CONFIG=drcom.conf
@@ -41,8 +41,9 @@ Y|y|"")
 	passwd root;;
 N|n)
 	break;;
-clear
 esac
+clear
+
 
 #Gether information
 
@@ -68,13 +69,16 @@ esac
 
 # change username and passwd
 read -p "Please enter your Student number: " username
-read -s -p "Please enter your password: " password
+read -p "Please enter your password: " password
 # Crontab setting confirm
 read -p "Set up cron? [Y|N]" ifSet
 
 # Change WIFI Passwprd
 read -p "Change your WIFI password? [Y/N]: " ifChange
-read -p "Please enter your new WIFI password: " wifi_password
+if [[ $ifChange -eq "Y" ]]
+then
+	read -p "Please enter your new WIFI password: " wifi_password
+fi
 
 # Information recheck
 clear
