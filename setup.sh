@@ -93,7 +93,7 @@ read -p "Set up cron? [Y/n]" ifSet
 read -p "Change your WIFI password? [Y/n]: " ifChange
 case $ifChange in
 Y|y)
-    read -p "Please enter your new WIFI password: " wifi_passwords;;
+    read -p "Please enter your new WIFI password: " wifi_password;;
 N|n)
     ;;
 esac
