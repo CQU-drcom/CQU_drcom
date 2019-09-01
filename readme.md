@@ -34,7 +34,6 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 
 AGPLv3
 
-特别指出禁止任何个人或者公司将 [drcoms](http://github.com/drcoms/) 的代码投入商业使用，由此造成的后果和法律责任均与本人无关。 
+特别指出禁止任何个人或者公司将 [drcoms](http://github.com/drcoms/) 的代码投入商业使用，由此造成的后果和法律责任均与本人无关。
 </br>
 其中latest-wired.py来自项目[drcom-generic](https://github.com/drcoms/drcom-generic)
-
