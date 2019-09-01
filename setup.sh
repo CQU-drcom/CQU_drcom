@@ -160,7 +160,6 @@ then
     opkg install python
 fi
 
-
 echo "Set up scripts..."
 chmod +x *.sh
 chmod +x *drcom
@@ -188,7 +187,7 @@ Y|y|"")
         uci set wireless.@wifi-device[0].disabled=0
         uci set wireless.@wifi-device[1].disabled=0
         uci set wireless.@wifi-iface[0].ssid=OpenWrt_1
-        uci set wireless.@wifi-iface[0].ssid=OpenWrt_2
+        uci set wireless.@wifi-iface[1].ssid=OpenWrt_2
     fi
     uci set wireless.@wifi-iface[0].encryption=psk2
     uci set wireless.@wifi-iface[1].encryption=psk2
