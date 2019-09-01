@@ -4,7 +4,7 @@
 
 - 适用于重庆大学AB校区及虎溪校区
 - 在OpenWrt以及Pandorabox上测试通过，请自行百度刷机方法
-- 目前更推荐OpenWrt，在Pandorabox中可能会因为架构问题无法安装python，而在OpenWrt中使用[ 重庆大学开源软件镜像站](http://mirrors.cqu.edu.cn/openwrt/)作为软件源，不会出现该问题所以请务必连接好内网
+- 目前更推荐OpenWrt，在Pandorabox中可能会因为架构问题无法安装python，而在OpenWrt中使用[ 重庆大学开源软件镜像站](http://mirrors.cqu.edu.cn/openwrt/)作为软件源，不会出现该问题，所以请务必连接好内网
 - 本配置包集成了检测网络连接的功能
 - 配置包中的 `latest-wired.py` 填写账号密码，并将 `IS_TEST = False` 改为 `IS_TEST = True` 后可直接在电脑上使用
 
