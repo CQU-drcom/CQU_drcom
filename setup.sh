@@ -11,8 +11,16 @@ uname -a | grep PandoraBox | grep -v grep
 
 if [ $? -ne 0 ]
 then
-   echo "Not PandoraBox, exit..."
-   exit 0
+   uname -a | grep Wrt | grep -v grep
+   if [ $? -ne 0 ]
+   then
+        echo "You cannot use the setup script."
+        exit 0
+   else
+     distro=openwrt
+   fi
+else
+  distro=pandorabox
 fi
 clear
 echo "Welcome to use CQU_drcom setup program."
@@ -34,7 +42,7 @@ fi
 
 # change root passwd
 
-read -p "Change your root password? (For security it will show nothing when you enter.) [Y|N]:" rootpasswd
+read -p "Change your root password? (For security it will show nothing when you enter.) [Y/n]:" rootpasswd
 case $rootpasswd in
 Y|y|"")
 	passwd root;;
@@ -46,9 +54,10 @@ clear
 
 #Gether information
 
-echo ""
+
 echo "1.A or B"
 echo "2.D"
+echo ""
 
 read -p "Please enter your campus: " CHOICE
 case $CHOICE in
@@ -65,21 +74,31 @@ case $CHOICE in
     echo "Errors! Please run the program again."
     exit 0;;
 esac
+clear
 
 # change username and passwd
 read -p "Please enter your Student number: " username
 read -p "Please enter your password: " password
+
 # Crontab setting confirm
-echo ""
+echo "The cron is a schedule for script to run. It's like:"
 cat mycron
 echo ""
-read -p "Set up cron? [Y|N]" ifSet
+echo "which means the networkChecking script will run every 2 seconds and "
+echo "every 8 hour it will clean logs of drcom."
+echo ""
+read -p "Set up cron? [Y/n]" ifSet
 
 # Change WIFI Passwprd
-read -p "Change your WIFI password? [Y/N]: " ifChange
+read -p "Change your WIFI password? [Y/n]: " ifChange
 if [[ $ifChange == "Y" ]]
 then
 	read -p "Please enter your new WIFI password: " wifi_password
+else
+  if [[ $ifChange == "y" ]]
+  then
+  	read -p "Please enter your new WIFI password: " wifi_password
+  fi
 fi
 
 # Information recheck
@@ -92,6 +111,7 @@ echo "Your password:"
 echo $password
 echo "Change WIFI password:"
 echo $ifChange
+
 case $ifChange in
 Y|y|"")
     echo "Your new password will be:"
@@ -99,6 +119,7 @@ Y|y|"")
 N|n|*)
     break;;
 esac
+
 echo "Crontab:"
 echo $ifSet
 echo ""
@@ -115,17 +136,50 @@ N|n)
 esac
 read -n1 -p "Press any key to continue installation... "
 echo ""
+clear
 
 mv $DRCOM $pkgname
 cp -p $pkgname\_$campus.conf  $CONFIG
 sed -i "s/username=''/username=\'$username\'/g" $CONFIG
 sed -i "s/password=''/password=\'$password\'/g" $CONFIG
+
 echo "Install python-mini..."
-opkg install zlib_1.2.8-1_ralink.ipk python-mini_2.7.3-2_ralink.ipk
+python --version
+if [ $? -ne 0 ]
+then
+  opkg install zlib_1.2.8-1_ralink.ipk python-mini_2.7.3-2_ralink.ipk
+fi
+
+
 echo "Set up scripts..."
 chmod +x *.sh
 chmod +x *drcom
-cp -p 99-drcom /etc/hotplug.d/iface/
+
+if [[ $distro == "pandorabox" ]]
+then
+    cp -p 99-drcom /etc/hotplug.d/iface/
+fi
+if [[ $distro == "openwrt" ]]
+then
+    echo '#!/bin/sh /etc/rc.commmon
+    START=99
+
+    start() {
+    	/usr/bin/drcom
+    }
+    stop() {
+    	pkill -9 python
+    }
+    restart() {
+    	/usr/bin/drcom
+    }' > 99-drcom
+    chmod a+x 99-drcom
+    cp -p 99-drcom /etc/init.d
+    cd /etc/init.d
+    ./99-drcom enable
+    ./99-drcom start > /dev/null 2>&1
+    cd -
+fi
 cp -p drcom /usr/bin/
 cp -p networkChecking.sh /usr/bin/
 cp -p drcom.conf /etc/
@@ -157,8 +211,9 @@ esac
 # Network Checking and Remove Setup Files
 sh /usr/bin/networkChecking.sh
 echo "Network checking..."
-sleep 10s
+
 ping -c 1 baidu.com > /dev/null 2>&1
+
 if [ $? -eq 0 ]
 then
    echo "OK..."
