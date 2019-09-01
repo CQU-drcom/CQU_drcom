@@ -88,8 +88,14 @@ echo "which means the networkChecking script will run every 30 seconds and "
 echo "every 8 hour it will clean logs of drcom."
 echo ""
 read -p "Set up cron? [Y/n]" ifSet
+case $ifSet in
+Y|y|"")
+    ifSet_cron=Yes;;
+N|n)
+    ifSet_cron=no;;
+esac
 
-# Change WIFI Passwprd
+# Change WIFI ssid
 read -p "Change wifi ssid ? [Y/n]: " ifset_ssid
 case $ifset_ssid in
 Y|y|"")
@@ -110,11 +116,12 @@ N|n)
     wifi_ssid0=$distro
     wifi_ssid1=$distro
     ;;
+esac
 
 # Wifi password
 read -p "Change your WIFI password ? [Y/n]: " ifChange
 case $ifChange in
-Y|y)
+Y|y|"")
     read -p "Use different password? [y/N]: " ifset_passwd_diff
     case $ifset_passwd_diff in
     Y|y)
@@ -123,9 +130,9 @@ Y|y)
         ;;
     N|n|"")
         read -p "Please enter your new WIFI password: " wifi_password0
-        wifi_password1=$wifi_password0 
+        wifi_password1=$wifi_password0
         ;;
-
+    esac
     ;;
 N|n)
     echo "Wifi password will leave empty."
@@ -158,7 +165,7 @@ N|n|*)
 esac
 
 echo "Crontab:"
-echo $ifSet
+echo $ifSet_cron
 echo ""
 read -p "Is the above information right? [Y/n]" solution
 case $solution in
