@@ -90,11 +90,36 @@ echo ""
 read -p "Set up cron? [Y/n]" ifSet
 
 # Change WIFI Passwprd
-read -p "Change your WIFI password? [Y/n]: " ifChange
+read -p "Change wifi ssid ? [Y/n]: " ifset_ssid
+case $ifset_ssid in
+Y|y|"")
+    read -p "Use different name? [y/N]: " ifset_ssid_diff
+    case $ifset_ssid_diff in
+    Y|y)
+        read -p "Enter 5Ghz wifi SSID: " $wifi_ssid0
+        read -p "Enter 2.4Ghz wifi SSID: " $wifi_ssid1
+        ;;
+    N|n|"")
+        read -p "Enter wifi SSID: " $wifi_ssid0
+        wifi_ssid1=$wifi_ssid0
+        ;;
+    esac
+    ;;
+N|n)
+    echo "SSID will be " $distro
+    wifi_ssid0=$distro
+    wifi_ssid1=$distro
+    ;;
+
+# Wifi password
+read -p "Change your WIFI password ? [Y/n]: " ifChange
 case $ifChange in
 Y|y)
-    read -p "Please enter your new WIFI password: " wifi_passwords;;
+    read -p "Please enter your new WIFI password: " wifi_password0
+    wifi_password1=$wifi_password0
+    ;;
 N|n)
+    echo "Wifi password will leave empty."
     ;;
 esac
 
@@ -106,13 +131,19 @@ echo "Your Student number:"
 echo $username
 echo "Your password:"
 echo $password
+echo "SSID for 5Ghz:"
+echo $wifi_ssid0
+echo "SSID for 2.4Ghz:"
+echo $wifi_ssid1
 echo "Change WIFI password:"
 echo $ifChange
 
 case $ifChange in
 Y|y|"")
-    echo "Your new password will be:"
-    echo $wifi_password;;
+    echo "WIFI password for 5Ghz:"
+    echo $wifi_password0
+    echo "WIFI password for 2.4Ghz"
+    echo $wifi_password1 ;;
 N|n|*)
     break;;
 esac
@@ -170,9 +201,41 @@ then
 fi
 
 echo "Set up scripts..."
-chmod +x *.sh
-chmod +x *drcom
-cp -p 99-drcom /etc/hotplug.d/iface/
+case $distro in
+"pandorabox")
+      echo "#!/bin/sh
+      # /etc/hotplug.d/iface/99-drcom
+      if [ "$ACTION" = ifup ]; then
+          if [ "${INTERFACE}" = "wan" ]; then
+              sleep 10 && python /usr/bin/drcom > ~/drcom.log &
+          fi
+      fi" > 99-drcom
+      chmod a+x 99-drcom
+      cp -p 99-drcom /etc/hotplug.d/iface/ ;;
+
+"openwrt")
+      echo '#!/bin/sh /etc/rc.commmon
+      START=99
+      start() {
+        /usr/bin/drcom
+      }
+      stop() {
+        pkill -9 python
+      }
+      restart() {
+        /usr/bin/drcom
+      }' > 99-drcom
+      chmod a+x 99-drcom
+      cp -p 99-drcom /etc/init.d
+      cd /etc/init.d
+      ./99-drcom enable
+      ./99-drcom start > /dev/null 2>&1
+      cd - ;;
+esac
+
+echo "installing drcom to /usr/bin/drcom"
+echo "installing drcom.conf to /etc/drcom.conf"
+
 cp -p drcom /usr/bin/
 cp -p networkChecking.sh /usr/bin/
 cp -p drcom.conf /etc/
@@ -195,13 +258,13 @@ Y|y|"")
     then
         uci set wireless.@wifi-device[0].disabled=0
         uci set wireless.@wifi-device[1].disabled=0
-        uci set wireless.@wifi-iface[0].ssid=OpenWrt_1
-        uci set wireless.@wifi-iface[1].ssid=OpenWrt_2
+        uci set wireless.@wifi-iface[0].ssid=$wifi_ssid0
+        uci set wireless.@wifi-iface[1].ssid=$wifi_ssid1
     fi
     uci set wireless.@wifi-iface[0].encryption=psk2
     uci set wireless.@wifi-iface[1].encryption=psk2
-    uci set wireless.@wifi-iface[0].key=$wifi_password
-    uci set wireless.@wifi-iface[1].key=$wifi_password
+    uci set wireless.@wifi-iface[0].key=$wifi_password0
+    uci set wireless.@wifi-iface[1].key=$wifi_password1
     uci commit
     wifi up;;
 N|n|*)
@@ -225,3 +288,12 @@ fi
 sleep 1s
 clear
 echo "It is OK. Enjoy!"
+echo "--------------------"
+echo "Wifi ssid (5Ghz) :" $wifi_ssid0
+echo "Passwd :" $wifi_password0
+echo "Wifi ssid (2.4Ghz) :" $wifi_ssid1
+echo "Passwd :" $wifi_password1
+echo ""
+echo "Note: some of mobile phones of Huawei and OPPO don't support 5Ghz wifi, so"
+echo "      may find only one ssid of your routine in the list."
+echo "--------------------"
