@@ -115,8 +115,17 @@ N|n)
 read -p "Change your WIFI password ? [Y/n]: " ifChange
 case $ifChange in
 Y|y)
-    read -p "Please enter your new WIFI password: " wifi_password0
-    wifi_password1=$wifi_password0
+    read -p "Use different password? [y/N]: " ifset_passwd_diff
+    case $ifset_passwd_diff in
+    Y|y)
+        read -p "Enter password for " $wifi_ssid0 wifi_password0
+        read -p "Enter password for " $wifi_ssid1 wifi_password1
+        ;;
+    N|n|"")
+        read -p "Please enter your new WIFI password: " wifi_password0
+        wifi_password1=$wifi_password0 
+        ;;
+
     ;;
 N|n)
     echo "Wifi password will leave empty."
