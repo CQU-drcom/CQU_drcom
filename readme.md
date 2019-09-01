@@ -3,15 +3,19 @@
 ## 1.注意事项：
 
 - 适用于重庆大学AB校区及虎溪校区
-- 仅在Pandora Box上测试通过，请自行百度刷机方法
+- 在Openwrt以及Pandorabox上测试通过，请自行百度刷机方法
 - 本配置包集成了检测网络连接的功能
-- 配置包中的 `latest-wired_ab.py` 和 `latest-wired_d.py` 填写账号密码，并将 `IS_TEST = False` 改为 `IS_TEST = True` 后可直接在电脑上使用
+- 配置包中的 `latest-wired.py` 填写账号密码，并将 `IS_TEST = False` 改为 `IS_TEST = True` 后可直接在电脑上使用
 
 ## 2.使用方法
 
-1. [下载此配置包](https://github.com/purefkh/CQU_drcom/archive/master.zip)，并解压
+1. 下载此配置包，并解压
 
-2. 使用 `scp工具` 将 __解压后的文件夹__ 上传到路由器的 `/tmp/` 路径下
+2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/tmp/` 路径下
+> Linux 下请执行：
+```bash
+scp CQU_drcom* -r root@192.168.1.1:/root/
+```
 
 3. 使用 `putty` 等ssh工具，登录你的路由器
 
@@ -22,8 +26,7 @@
    sh setup.sh
    ```
 
-5. 如果返回联网失败，可稍后再次检查网络连通情况；若连接成功，执行 `rm -r /tmp/setup/` 删除此配置程序
-
+5. 如果返回联网失败，可稍后再次检查网络连通情况；
 6. 享受路由器吧
 
 ## 许可证
