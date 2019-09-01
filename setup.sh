@@ -84,22 +84,19 @@ read -p "Please enter your password: " password
 echo "The cron is a schedule for script to run. It's like:"
 cat mycron
 echo ""
-echo "which means the networkChecking script will run every 2 seconds and "
+echo "which means the networkChecking script will run every 30 seconds and "
 echo "every 8 hour it will clean logs of drcom."
 echo ""
 read -p "Set up cron? [Y/n]" ifSet
 
 # Change WIFI Passwprd
 read -p "Change your WIFI password? [Y/n]: " ifChange
-if [[ $ifChange == "Y" ]]
-then
-	read -p "Please enter your new WIFI password: " wifi_password
-else
-  if [[ $ifChange == "y" ]]
-  then
-  	read -p "Please enter your new WIFI password: " wifi_password
-  fi
-fi
+case $ifChange in
+Y|y)
+    read -p "Please enter your new WIFI password: " wifi_passwords;;
+N|n)
+    ;;
+esac
 
 # Information recheck
 clear
@@ -123,7 +120,7 @@ esac
 echo "Crontab:"
 echo $ifSet
 echo ""
-read -p "Is the above information right? [Y/N]" solution
+read -p "Is the above information right? [Y/n]" solution
 case $solution in
 Y|y)
     echo "Good!";;
@@ -143,43 +140,31 @@ cp -p $pkgname\_$campus.conf  $CONFIG
 sed -i "s/username=''/username=\'$username\'/g" $CONFIG
 sed -i "s/password=''/password=\'$password\'/g" $CONFIG
 
-echo "Install python-mini..."
-python --version
-if [ $? -ne 0 ]
+if [[ $distro == "pandorabox" ]]
 then
-  opkg install zlib_1.2.8-1_ralink.ipk python-mini_2.7.3-2_ralink.ipk
+    echo "Install python-mini..."
+    python --version
+    if [ $? -ne 0 ]
+    then
+        opkg install zlib_1.2.8-1_ralink.ipk python-mini_2.7.3-2_ralink.ipk
+    fi
+fi
+if [[ $distro == "openwrt" ]]
+then
+    echo "Change repositories..."
+    cp /etc/opkg/distfeeds.conf /etc/opkg/distfeeds.conf.save
+    sed -i 's/downloads.openwrt.org/mirrors.cqu.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
+    opkg update
+    echo ""
+    echo "Install python..."
+    opkg install python
 fi
 
 
 echo "Set up scripts..."
 chmod +x *.sh
 chmod +x *drcom
-
-if [[ $distro == "pandorabox" ]]
-then
-    cp -p 99-drcom /etc/hotplug.d/iface/
-fi
-if [[ $distro == "openwrt" ]]
-then
-    echo '#!/bin/sh /etc/rc.commmon
-    START=99
-
-    start() {
-    	/usr/bin/drcom
-    }
-    stop() {
-    	pkill -9 python
-    }
-    restart() {
-    	/usr/bin/drcom
-    }' > 99-drcom
-    chmod a+x 99-drcom
-    cp -p 99-drcom /etc/init.d
-    cd /etc/init.d
-    ./99-drcom enable
-    ./99-drcom start > /dev/null 2>&1
-    cd -
-fi
+cp -p 99-drcom /etc/hotplug.d/iface/
 cp -p drcom /usr/bin/
 cp -p networkChecking.sh /usr/bin/
 cp -p drcom.conf /etc/
@@ -198,20 +183,27 @@ esac
 
 case $ifChange in
 Y|y|"")
-   uci set wireless.@wifi-iface[0].encryption=psk2
-   uci set wireless.@wifi-iface[1].encryption=psk2
-   uci set wireless.@wifi-iface[0].key=$wifi_password
-   uci set wireless.@wifi-iface[1].key=$wifi_password
-   wifi
-   uci commit;;
+    if [[ $distro == "openwrt" ]]
+    then
+        uci set wireless.@wifi-device[0].disabled=0
+        uci set wireless.@wifi-device[1].disabled=0
+        uci set wireless.@wifi-iface[0].ssid=OpenWrt_1
+        uci set wireless.@wifi-iface[0].ssid=OpenWrt_2
+    fi
+    uci set wireless.@wifi-iface[0].encryption=psk2
+    uci set wireless.@wifi-iface[1].encryption=psk2
+    uci set wireless.@wifi-iface[0].key=$wifi_password
+    uci set wireless.@wifi-iface[1].key=$wifi_password
+    wifi
+    uci commit;;
 N|n|*)
-   echo "password will leave empty";;
+    echo "password will leave empty";;
 esac
 
 # Network Checking and Remove Setup Files
 sh /usr/bin/networkChecking.sh
 echo "Network checking..."
-
+sleep 10s
 ping -c 1 baidu.com > /dev/null 2>&1
 
 if [ $? -eq 0 ]
