@@ -122,7 +122,7 @@ echo $ifSet
 echo ""
 read -p "Is the above information right? [Y/n]" solution
 case $solution in
-Y|y)
+Y|y|"")
     echo "Good!";;
 N|n)
     echo "Rerun setup.sh!"
@@ -152,8 +152,17 @@ fi
 if [[ $distro == "openwrt" ]]
 then
     echo "Change repositories..."
+    echo "Old opkg sources file will be installed as /etc/opkg/distfeeds.conf.save"
     cp /etc/opkg/distfeeds.conf /etc/opkg/distfeeds.conf.save
     sed -i 's/downloads.openwrt.org/mirrors.cqu.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
+    ping -c 1 mirrors.cqu.edu.cn
+    if [ $? -eq 0 ]
+    then
+       echo "Network is connected..."
+    else
+       echo "Failed... Please check your network connection."
+       exit 0
+    fi
     opkg update
     echo ""
     echo "Install python..."
