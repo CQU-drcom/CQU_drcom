@@ -111,7 +111,7 @@ echo $ifChange
 
 case $ifChange in
 Y|y|"")
-    echo "Your new password will be:"
+    echo "Your new WIFI password will be:"
     echo $wifi_password;;
 N|n|*)
     break;;
