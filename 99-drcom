@@ -1,8 +1,0 @@
-#!/bin/sh 
-# /etc/hotplug.d/iface/99-drcom 
-if [ "$ACTION" = ifup ]; then 
-    if [ "${INTERFACE}" = "wan" ]; then 
-        sleep 10 && python /usr/bin/drcom > ~/drcom.log & 
-    fi 
-fi
-
