@@ -1,4 +1,8 @@
 # 这是一个为懒人制作的路由器drcom一键配置包
+## 0.分支说明
+本分支为代码主分支，一般正常使用，较为稳定。
+***DEV*** 分支为测试分支，一般可使用。
+两分支区别在于 ***DEV*** 提供了更多选项（包含静态地址设置），而主分支（即本分）侧重于稳定以及通常情况下的快速配置，请按需选择。
 
 ## 1.注意事项：
 
@@ -10,7 +14,7 @@
 
 ## 2.使用方法
 
-1. 下载此配置包，并解压
+1. 在[RELEASE](https://github.com/purefkh/release)中下载[此配置包](https://github.com/purefkh/CQU_drcom/archive/v1.1.zip)，并解压
 
 2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/tmp/` 路径下
 > Linux 下请执行：
@@ -34,7 +38,6 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 
 AGPLv3
 
-特别指出禁止任何个人或者公司将 [drcoms](http://github.com/drcoms/) 的代码投入商业使用，由此造成的后果和法律责任均与本人无关。 
+特别指出禁止任何个人或者公司将 [drcoms](http://github.com/drcoms/) 的代码投入商业使用，由此造成的后果和法律责任均与本人无关。
 </br>
 其中latest-wired.py来自项目[drcom-generic](https://github.com/drcoms/drcom-generic)
-
