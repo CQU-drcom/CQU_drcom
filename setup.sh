@@ -126,11 +126,11 @@ Y|y|"")
     read -p "Use different name? [y/N]: " ifset_ssid_diff
     case $ifset_ssid_diff in
     Y|y)
-        read -p "Enter 5Ghz wifi SSID: " $wifi_ssid0
-        read -p "Enter 2.4Ghz wifi SSID: " $wifi_ssid1
+        read -p "Enter 5Ghz wifi SSID: " wifi_ssid0
+        read -p "Enter 2.4Ghz wifi SSID: " wifi_ssid1
         ;;
     N|n|"")
-        read -p "Enter wifi SSID: " $wifi_ssid1
+        read -p "Enter wifi SSID: " wifi_ssid1
         wifi_ssid0=$wifi_ssid1\_5G
         ;;
     esac
@@ -149,8 +149,10 @@ Y|y|"")
     read -p "Use different password? [y/N]: " ifset_passwd_diff
     case $ifset_passwd_diff in
     Y|y)
-        read -p "Enter password for " $wifi_ssid0 wifi_password0
-        read -p "Enter password for " $wifi_ssid1 wifi_password1
+        echo "Enter password for " $wifi_ssid0
+        read -p ">" wifi_password0
+        echo "Enter password for " $wifi_ssid1
+        read -p ">" wifi_password1
         ;;
     N|n|"")
         read -p "Please enter your new WIFI password: " wifi_password0
