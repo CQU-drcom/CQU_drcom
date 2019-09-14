@@ -330,8 +330,8 @@ Y|y|"")
     then
         uci set wireless.@wifi-device[0].disabled=0
         uci set wireless.@wifi-device[1].disabled=0
-        uci set wireless.@wifi-iface[0].ssid='$wifi_ssid0'
-        uci set wireless.@wifi-iface[1].ssid='$wifi_ssid1'
+        uci set wireless.@wifi-iface[0].ssid=\'$wifi_ssid0\'
+        uci set wireless.@wifi-iface[1].ssid=\'$wifi_ssid1\'
     fi
     uci set wireless.@wifi-iface[0].encryption=psk2
     uci set wireless.@wifi-iface[1].encryption=psk2
