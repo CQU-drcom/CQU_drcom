@@ -1,2 +1,0 @@
-*/1 * * * * sh /usr/bin/networkChecking.sh && sleep 30 && sh /usr/bin/networkChecking.sh
-* */8 * * * echo $NULL > ~/networkChecking.log
