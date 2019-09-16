@@ -280,23 +280,21 @@ case $distro in
       cp -p 99-drcom /etc/hotplug.d/iface/ ;;
 
 "openwrt")
-      echo '#!/bin/sh /etc/rc.commmon
+      echo '#!/bin/sh /etc/rc.common
       START=99
       start() {
-        /usr/bin/drcom
+        (/usr/bin/drcom > /dev/null &)&
       }
       stop() {
-        pkill -9 python
+        kill -9 $(pidof python)
       }
       restart() {
-        /usr/bin/drcom
+        (/usr/bin/drcom > /dev/null &)&
       }' > 99-drcom
       chmod a+x 99-drcom
-      cp -p 99-drcom /etc/init.d
-      cd /etc/init.d
-      ./99-drcom enable
-      ./99-drcom start > /dev/null 2>&1
-      cd - ;;
+      mv 99-drcom /etc/init.d/.
+      /etc/init.d/99-drcom enable
+      ;;
 esac
 
 echo "installing drcom to /usr/bin/drcom"
@@ -345,6 +343,7 @@ N|n|*)
 esac
 
 # Network Checking
+(/usr/bin/drcom > /dev/null &)&
 sh networkChecking.sh
 echo "Network checking..."
 sleep 10s
