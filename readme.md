@@ -30,6 +30,19 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 
 5. 如果返回联网失败，可稍后再次检查网络连通情况
 
+## 關於啓動腳本
+位置: `/etc/init.d/99-drcom`
+```sh
+#stop drcom
+/etc/init.d/99-drcom stop
+#restart drcom
+/etc/init.d/99-drcom restart
+#start drcom
+/etc/init.d/99-drcom start
+#enable drcom at system start
+/etc/init.d/99-drcom enable
+```
+所有有關的控制項目可至`Luci` -> `System - Startup` -> `Initscripts`尋找。
 ## CHANGE LOG
 2019.09.16
 - 修正了啓動腳本`99-drcom`中的錯誤
