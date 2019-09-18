@@ -44,6 +44,9 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 ```
 所有有關的控制項目可至`Luci` -> `System - Startup` -> `Initscripts`尋找。
 ## CHANGE LOG
+2019.09.18
+- 替换了虎溪校区配置文件为最新版本
+
 2019.09.16
 - 修正了啓動腳本`99-drcom`中的錯誤
 
@@ -54,8 +57,9 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 - 增加了设置静态IP的功能（意味着可用于研究生办公室以及部分实验室区域）
 - 增加了base64编码方式
 - 去除了冗余文件
+
 2019.09.12
-修复了开启WiFi电源后无E SSID的问题
+- 修复了开启WiFi电源后无E SSID的问题
 
 ## 许可证
 其余部分除openwrt预编译包外均遵循GPLv3许可证 ，请勿用作商用。
