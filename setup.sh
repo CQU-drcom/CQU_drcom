@@ -28,7 +28,7 @@ echo "======================================"
 #config network
 read -p "Manually config the network? [y/N]: " ifSet_wan
 case $ifSet_wan in
-  n|N|*|"")
+  n|N|"")
       ;;
   y|Y)
       read -p "IP (Default to 192.168.1.1): " ifSet_wan_ip
@@ -38,10 +38,10 @@ case $ifSet_wan in
 
       uci del network.wan.proto
       uci set network.wan.proto='static'
-      uci set network.wan.ipaddr=\'$ifSet_wan_ip\'
-      uci set network.wan.netmask=\'$ifSet_wan_netmask\'
-      uci set network.wan.gateway=\'$ifSet_wan_gateway\'
-      uci set network.wan.dns=\'$ifSet_wan_dns\'
+      uci set network.wan.ipaddr=$ifSet_wan_ip$([ -z "$ifSet_wan_ip" ] && echo 192.168.1.1)
+      uci set network.wan.netmask=$ifSet_wan_netmask$([ -z "$ifSet_wan_netmask" ] && echo 255.255.255.0)
+      uci set network.wan.gateway=$ifSet_wan_gateway$([ -z "$ifSet_wan_gateway" ] && echo 192.168.1.0)
+      uci set network.wan.dns="$ifSet_wan_dns$([ -z "$ifSet_wan_dns" ] && echo 8.8.8.8 8.8.4.4)"
       echo "Commit changes..."
       uci commit
       echo "Restarting network service..."
@@ -131,7 +131,7 @@ Y|y|"")
         ;;
     N|n|"")
         read -p "Enter wifi SSID: " wifi_ssid1
-        wifi_ssid0=$wifi_ssid1\_5G
+        wifi_ssid0="${wifi_ssid1}_5G"
         ;;
     esac
     ;;
@@ -149,14 +149,14 @@ Y|y|"")
     read -p "Use different password? [y/N]: " ifset_passwd_diff
     case $ifset_passwd_diff in
     Y|y)
-        echo "Enter password for " $wifi_ssid0
+        echo "Enter password for " "$wifi_ssid0"
         read -p ">" wifi_password0
-        echo "Enter password for " $wifi_ssid1
+        echo "Enter password for " "$wifi_ssid1"
         read -p ">" wifi_password1
         ;;
     N|n|"")
         read -p "Please enter your new WIFI password: " wifi_password0
-        wifi_password1=$wifi_password0
+        wifi_password1="$wifi_password0"
         ;;
     esac
     ;;
@@ -174,18 +174,18 @@ echo $username
 echo "Your password:"
 echo $password
 echo "SSID for 5Ghz:"
-echo $wifi_ssid0
+echo "$wifi_ssid0"
 echo "SSID for 2.4Ghz:"
-echo $wifi_ssid1
+echo "$wifi_ssid1"
 echo "Change WIFI password:"
 echo $ifChange
 
 case $ifChange in
 Y|y|"")
     echo "WIFI password for 5Ghz:"
-    echo $wifi_password0
+    echo "$wifi_password0"
     echo "WIFI password for 2.4Ghz"
-    echo $wifi_password1 ;;
+    echo "$wifi_password1" ;;
 N|n|*)
     break;;
 esac
@@ -263,7 +263,7 @@ case $campus in
 esac
 mv $DRCOM $pkgname
 sed -i "s/username=''/username=\'$username\'/g" $CONFIG
-sed -i "s/password=''/password=\'$password\'/g" $CONFIG
+sed -i "s/password=''/password=\'$(echo "$password" | sed 's/\\/\\\\\\\\/g;s/[&\/]/\\&/g;s/'\''/\\\\'\'/g)\'/g" $CONFIG
 
 #set up startup service
 echo "Setting up startup service..."
@@ -328,13 +328,13 @@ Y|y|"")
     then
         uci set wireless.@wifi-device[0].disabled=0
         uci set wireless.@wifi-device[1].disabled=0
-        uci set wireless.@wifi-iface[0].ssid=\'$wifi_ssid0\'
-        uci set wireless.@wifi-iface[1].ssid=\'$wifi_ssid1\'
+        uci set wireless.@wifi-iface[0].ssid="$wifi_ssid0"
+        uci set wireless.@wifi-iface[1].ssid="$wifi_ssid1"
     fi
     uci set wireless.@wifi-iface[0].encryption=psk2
     uci set wireless.@wifi-iface[1].encryption=psk2
-    uci set wireless.@wifi-iface[0].key=$wifi_password0
-    uci set wireless.@wifi-iface[1].key=$wifi_password1
+    uci set wireless.@wifi-iface[0].key="$wifi_password0"
+    uci set wireless.@wifi-iface[1].key="$wifi_password1"
     uci commit
     wifi up
     wifi reload;;
@@ -361,10 +361,10 @@ sleep 1s
 clear
 echo "Done. Enjoy!"
 echo "--------------------"
-echo "Wifi ssid (5Ghz) :" $wifi_ssid0
-echo "Passwd :" $wifi_password0
-echo "Wifi ssid (2.4Ghz) :" $wifi_ssid1
-echo "Passwd :" $wifi_password1
+echo "Wifi ssid (5Ghz) :" "$wifi_ssid0"
+echo "Passwd :" "$wifi_password0"
+echo "Wifi ssid (2.4Ghz) :" "$wifi_ssid1"
+echo "Passwd :" "$wifi_password1"
 echo ""
 echo "Note: some of mobile phones of Huawei and OPPO don't support 5Ghz wifi, so"
 echo "  you may find only one ssid of your routine in the list."
