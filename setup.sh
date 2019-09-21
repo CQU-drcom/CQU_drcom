@@ -263,7 +263,7 @@ case $campus in
 esac
 mv $DRCOM $pkgname
 sed -i "s/username=''/username=\'$username\'/g" $CONFIG
-sed -i "s/password=''/password=\'$(echo "$password" | sed 's/\\/\\\\\\\\/g;s/[&\/]/\\&/g;s/'\''/\\\\'\'/g)\'/g" $CONFIG
+sed -i "s/password=''/password=\'$(echo "$password" | sed 's/\\/\\\\\\\\/g;s/[&/]/\\&/g;s/'\''/\\\\'\'/g)\'/g" $CONFIG
 
 #set up startup service
 echo "Setting up startup service..."
