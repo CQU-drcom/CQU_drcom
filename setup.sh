@@ -263,7 +263,7 @@ case $campus in
 esac
 mv $DRCOM $pkgname
 sed -i "s/username=''/username=\'$username\'/g" $CONFIG
-sed -i "s/password=''/password=\'$password\'/g" $CONFIG
+sed -i "s/password=''/password=\'$(echo "$password" | sed 's/\\/\\\\\\\\/g;s/[&\/]/\\&/g;s/'\''/\\\\'\'/g)\'/g" $CONFIG
 
 #set up startup service
 echo "Setting up startup service..."
@@ -328,13 +328,13 @@ Y|y|"")
     then
         uci set wireless.@wifi-device[0].disabled=0
         uci set wireless.@wifi-device[1].disabled=0
-        uci set wireless.@wifi-iface[0].ssid=\'$wifi_ssid0\'
-        uci set wireless.@wifi-iface[1].ssid=\'$wifi_ssid1\'
+        uci set wireless.@wifi-iface[0].ssid="$wifi_ssid0"
+        uci set wireless.@wifi-iface[1].ssid="$wifi_ssid1"
     fi
     uci set wireless.@wifi-iface[0].encryption=psk2
     uci set wireless.@wifi-iface[1].encryption=psk2
-    uci set wireless.@wifi-iface[0].key=$wifi_password0
-    uci set wireless.@wifi-iface[1].key=$wifi_password1
+    uci set wireless.@wifi-iface[0].key="$wifi_password0"
+    uci set wireless.@wifi-iface[1].key="$wifi_password1"
     uci commit
     wifi up
     wifi reload;;
@@ -361,10 +361,10 @@ sleep 1s
 clear
 echo "Done. Enjoy!"
 echo "--------------------"
-echo "Wifi ssid (5Ghz) :" $wifi_ssid0
-echo "Passwd :" $wifi_password0
-echo "Wifi ssid (2.4Ghz) :" $wifi_ssid1
-echo "Passwd :" $wifi_password1
+echo "Wifi ssid (5Ghz) :" "$wifi_ssid0"
+echo "Passwd :" "$wifi_password0"
+echo "Wifi ssid (2.4Ghz) :" "$wifi_ssid1"
+echo "Passwd :" "$wifi_password1"
 echo ""
 echo "Note: some of mobile phones of Huawei and OPPO don't support 5Ghz wifi, so"
 echo "  you may find only one ssid of your routine in the list."
