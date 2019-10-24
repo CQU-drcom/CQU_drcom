@@ -4,6 +4,7 @@ DRCOM=latest-wired.py
 pkgname=drcom
 DR_PATH=/usr/bin
 CO_PATH=/etc
+echo() { printf '%s\n' "$*" ; }
 
 uname -a | grep PandoraBox | grep -v grep
 
