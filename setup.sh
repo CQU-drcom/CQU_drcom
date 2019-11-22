@@ -4,6 +4,20 @@ DRCOM=latest-wired.py
 pkgname=drcom
 DR_PATH=/usr/bin
 CO_PATH=/etc
+
+if [[ ! -f "/etc/os-release"]]
+then
+	echo "Recheck your package. You cannot run this script."
+	sleep 1
+	exit;
+fi
+
+# import system information
+source /etc/os-release;
+distro=$NAME
+
+
+# rewrite echo func By @Hagb 
 echo() { printf '%s\n' "$*" ; }
 
 uname -a | grep PandoraBox | grep -v grep
@@ -290,6 +304,7 @@ case $distro in
         kill -9 $(pidof python)
       }
       restart() {
+        kill -9 $(pidof python);
         (/usr/bin/drcom > /dev/null &)&
       }' > 99-drcom
       chmod a+x 99-drcom
