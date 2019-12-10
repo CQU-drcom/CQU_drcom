@@ -298,18 +298,25 @@ case $distro in
       echo '#!/bin/sh /etc/rc.common
       START=99
       start() {
+	echo "[RUNNING] Starting drcom service..."
         (/usr/bin/drcom > /dev/null &)&
+	echo "[DONE] Start drcom service succesfully."
       }
       stop() {
+	echo "[RUNNING] Stopping drcom..."
         kill -9 $(pidof python)
+	echo "[DONE] Drcom has been stopped."
       }
       restart() {
+	echo "[RUNNING] Stopping drcom ... "
         kill -9 $(pidof python);
+	echo "[RUNNING] Restarting drcom ... "
         (/usr/bin/drcom > /dev/null &)&
-      }' > 99-drcom
-      chmod a+x 99-drcom
-      mv 99-drcom /etc/init.d/.
-      /etc/init.d/99-drcom enable
+	echo "[DONE] Drcom restart succesfully."
+      }' > drcom
+      chmod a+x drcom
+      mv drcom /etc/init.d/.
+      /etc/init.d/drcom enable
       ;;
 esac
 
