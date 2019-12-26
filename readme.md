@@ -14,7 +14,7 @@
 
 ## 2.使用方法
 
-1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/archive/v1.1.zip)，并解压
+1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2)，并解压
 
 2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/tmp/` 路径下
 > Linux 下请执行：
@@ -34,6 +34,22 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 5. 如果返回联网失败，可稍后再次检查网络连通情况
 6. 享受路由器吧
 
+## 3.进程管理
+
+由于 OpenWrt 下 busybox 与一般 Linux 控制台没有太多差距，因此可以参照一般 Linux 控制台的使用方法去使用。 </br>
+drcom 自启动服务位于 `/etc/init.d/drcomctl`
+ ```bash
+ # 启动服务
+ /etc/init.d/drcomctl start
+ # 关闭服务
+ /etc/init.d/drcomctl stop
+ # 重启服务
+ /etc/init.d/drcomctl restart
+ # 设置自动启动
+ /etc/init.d/drcomctl enable
+ ```
+ 亦可以在 Luci (http://192.168.1.1 一般为此机的IP) System - Startup 中找到该管理的 luci app 。通过网页控制台进行管理。
+ 
 ## 许可证
 
 AGPLv3
