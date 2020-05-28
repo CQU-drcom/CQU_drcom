@@ -4,6 +4,7 @@ DRCOM=latest-wired.py
 pkgname=drcom
 DR_PATH=/usr/bin
 CO_PATH=/etc
+GET_HTTP_CODE=get_http_code.py
 
 if [[ ! -f "/etc/os-release"]]
 then
@@ -17,7 +18,7 @@ source /etc/os-release;
 distro=$NAME
 
 
-# rewrite echo func By @Hagb 
+# rewrite echo func By @Hagb
 echo() { printf '%s\n' "$*" ; }
 
 uname -a | grep PandoraBox | grep -v grep
@@ -69,6 +70,23 @@ network_config() {
         ;;
     esac
     sleep 1s
+}
+
+# networkChecking
+network_checking() {
+		URL="http://mirrors.cqu.edu.cn/generate_204"
+		#URL="http://www.google.com"
+		CODE=`python $GET_HTTP_CODE $URL`
+
+		if [ $CODE -ne "204" ];
+		then
+				echo "[FAIL!!] Network Checking"
+				echo "Please check the network connectivity!"
+				echo "Exit..."
+				exit 0
+		else
+				echo "[OK] Network Checking"
+		fi
 }
 
 # remove old file
@@ -239,27 +257,11 @@ pss() {
     # setup python2
     echo "Setting up python2..."
     case $distro in
-    "pandorabox")
-        python --version
-        if [ $? -ne 0 ]
-        then
-            echo "Install python-mini..."
-            opkg install zlib_1.2.8-1_ralink.ipk python-mini_2.7.3-2_ralink.ipk
-        fi
-        ;;
     "openwrt")
         echo "Change repositories..."
         echo "Old opkg sources file will be installed as /etc/opkg/distfeeds.conf.save"
         cp /etc/opkg/distfeeds.conf /etc/opkg/distfeeds.conf.save
         sed -i 's/downloads.openwrt.org/mirrors.cqu.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
-        ping -c 1 mirrors.cqu.edu.cn
-        if [ $? -eq 0 ]
-        then
-            echo "Network is connected..."
-        else
-            echo "Failed... Please check your network connection."
-            exit 0
-        fi
         opkg update
         echo ""
         echo "Install python..."
@@ -360,7 +362,7 @@ pss() {
     N|n)
         ;;
     esac
-    
+
     # Network Checking
         (/usr/bin/drcom > /dev/null &)&
         sh networkChecking.sh
@@ -422,6 +424,7 @@ case $ifSet_upgrade in
     n|N|"")
         hello
         network_config
+				network_checking
         clean_up
         root_pwd_change
         inform_gather
@@ -438,6 +441,7 @@ case $ifSet_upgrade in
         wifi_password1="the one you have set"
         hello
         network_config
+				network_checking
         clean_up
         inform_gather
         recheck
@@ -445,6 +449,3 @@ case $ifSet_upgrade in
         echo "All done!"
         ;;
 esac
-
-
-
