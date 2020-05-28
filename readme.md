@@ -46,6 +46,9 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 ```
 所有有關的控制項目可至`Luci` -> `System - Startup` -> `Initscripts`尋找。
 ## CHANGE LOG
+2020.05.28
+- 重写网络连通性判断部分，尝试以 http code 作为核验对象以减小对服务器的负担
+
 2019.12.25
 HAPPY XMAS!
 - 重写部分功能，添加所有功能为函数，在主体部分直接按照步骤调用即可
