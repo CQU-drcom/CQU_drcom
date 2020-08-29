@@ -1,9 +1,9 @@
 #!/usr/bin/sh
 CONFIG=drcom.conf
-DRCOM=latest-wired.py
-pkgname=drcom
-DR_PATH=/usr/bin
-CO_PATH=/etc
+DRCOM_ORIGIN=latest-wired.py
+DRCOM=drcom
+DRCOM_PATH=/usr/bin
+CONFIG_PATH=/etc
 
 if [[ ! -f "/etc/os-release"]]
 then
@@ -17,7 +17,7 @@ source /etc/os-release;
 distro=$NAME
 
 
-# rewrite echo func By @Hagb 
+# rewrite echo func By @Hagb
 echo() { printf '%s\n' "$*" ; }
 
 uname -a | grep PandoraBox | grep -v grep
@@ -75,13 +75,11 @@ network_config() {
 clean_up() {
     if [ -f $CO_path/$CONFIG ]
     then
-        cd $CO_PATH
-        mv $CONFIG $CONFIG.save
+        mv $CONFIG_PATH/$CONFIG $CONFIG_PATH/$CONFIG.save
     fi
-    if [ -f $DR_PATH/$pkgname ]
+    if [ -f $DRCOM_PATH/$DRCOM ]
     then
-        cd $DR_PATH
-        mv $pkgname $pkgname.save
+        rm $DRCOM_PATH/$DRCOM $DRCOM_PATH/$DRCOM.save
     fi
 }
 
@@ -262,7 +260,7 @@ pss() {
         fi
         opkg update
         echo ""
-        echo "Install python..."
+        echo "Installing python..."
         opkg install python
         ;;
     esac
@@ -280,7 +278,7 @@ pss() {
     esac
 
     #setup drcom
-    echo "Set up Dr.com..."
+    echo "Setting up Dr.com..."
     case $campus in
     "ab")
         echo "c2VydmVyID0gJzIwMi4yMDIuMC4xODAnCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCkNPTlRST0xDSEVDS1NUQVRVUyA9ICdceDIwJwpBREFQVEVSTlVNID0gJ1x4MDUnCmhvc3RfaXAgPSAnMTcyLjI0LjE1Mi44MScKSVBET0cgPSAnXHgwMScKaG9zdF9uYW1lID0gJ0dJTElHSUxJRVlFJwpQUklNQVJZX0ROUyA9ICcyMDIuMjAyLjAuMzMnCmRoY3Bfc2VydmVyID0gJzIwMi4yMDIuMi41MCcKQVVUSF9WRVJTSU9OID0gJ1x4MmZceDAwJwptYWMgPSAweDJjNjAwY2U4YzNjYgpob3N0X29zID0gJ05PVEU3JwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkY1x4MDInCnJvcl92ZXJzaW9uID0gRmFsc2UK" | base64 -d > $CONFIG
@@ -289,7 +287,7 @@ pss() {
         echo "c2VydmVyID0gJzIwMi4xLjEuMScKdXNlcm5hbWU9JycKcGFzc3dvcmQ9JycKQ09OVFJPTENIRUNLU1RBVFVTID0gJ1x4MDAnCkFEQVBURVJOVU0gPSAnXHgwMScKaG9zdF9pcCA9ICcxMC4yNTMuMTc4LjE0JwpJUERPRyA9ICdceDAxJwpob3N0X25hbWUgPSAnR0lMSUdJTElFWUUnClBSSU1BUllfRE5TID0gJzAuMC4wLjAnCmRoY3Bfc2VydmVyID0gJzEwLjI1My43LjcnCkFVVEhfVkVSU0lPTiA9ICdceDJmXHgwMCcKbWFjID0gMHhiMDI1YWEyMjdkNmIKaG9zdF9vcyA9ICdOT1RFNycKS0VFUF9BTElWRV9WRVJTSU9OID0gJ1x4ZGNceDAyJwpyb3JfdmVyc2lvbiA9IEZhbHNlIAo=" | base64 -d > $CONFIG
         ;;
     esac
-    mv $DRCOM $pkgname
+    mv $DRCOM_ORIGIN $DRCOM
     sed -i "s/username=''/username=\'$username\'/g" $CONFIG
     sed -i "s/password=''/password=\'$(echo "$password" | sed 's/\\/\\\\\\\\/g;s/[&/]/\\&/g;s/'\''/\\\\'\'/g)\'/g" $CONFIG
 
@@ -339,7 +337,7 @@ pss() {
 
     echo "installing drcom to /usr/bin/drcom"
     echo "installing drcom.conf to /etc/drcom.conf"
-    cp -p drcom /usr/bin/
+    cp -p drcom /usr/bin/ && chmod a+x /usr/bin/drcom
     cp -p $CONFIG /etc/
     sleep 1s
 
@@ -360,7 +358,7 @@ pss() {
     N|n)
         ;;
     esac
-    
+
     # Network Checking
         (/usr/bin/drcom > /dev/null &)&
         sh networkChecking.sh
@@ -445,6 +443,3 @@ case $ifSet_upgrade in
         echo "All done!"
         ;;
 esac
-
-
-
