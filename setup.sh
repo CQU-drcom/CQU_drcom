@@ -20,22 +20,22 @@ distro=$NAME
 # rewrite echo func By @Hagb
 echo() { printf '%s\n' "$*" ; }
 
-uname -a | grep PandoraBox | grep -v grep
-
-if [ $? -ne 0 ]
-then
-   uname -a | grep Wrt | grep -v grep
-   if [ $? -ne 0 ]
-   then
-        echo "You cannot use the setup script."
-        exit 0
-   else
-     distro=openwrt
-   fi
-else
-  distro=pandorabox
-fi
-clear
+#uname -a | grep PandoraBox | grep -v grep
+#
+#if [ $? -ne 0 ]
+#then
+#   uname -a | grep Wrt | grep -v grep
+#   if [ $? -ne 0 ]
+#   then
+#        echo "You cannot use the setup script."
+#        exit 0
+#   else
+#     distro=openwrt
+#   fi
+#else
+#  distro=pandorabox
+#fi
+#clear
 
 # hello mates
 hello() {
@@ -73,7 +73,7 @@ network_config() {
 
 # remove old file
 clean_up() {
-    if [ -f $CO_path/$CONFIG ]
+    if [ -f $CONFIG_PATH/$CONFIG ]
     then
         mv $CONFIG_PATH/$CONFIG $CONFIG_PATH/$CONFIG.save
     fi
