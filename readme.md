@@ -8,13 +8,13 @@
 - 请刷入国内魔改固件或者部分论坛私有固件的同志 ***自行解决*** 出现的一切可能造成的包含：***损坏、异常使用*** 等情况。我们只保证来自 ***openwrt.org***的固件使用正常。Pandorabox、魔改版openwrt、pandavan不作任何保证可以正常使用。因此刷入以上固件的同志请保证自己具有 ***shell编程基础***
 - 适用于重庆大学AB校区及虎溪校区
 - 在OpenWrt<s>以及Pandorabox</s>上测试通过，请自行百度刷机方法
-- 目前更推荐OpenWrt，在Pandorabox中可能会因为架构问题无法安装python，而在OpenWrt中使用[ 重庆大学开源软件镜像站](http://mirrors.cqu.edu.cn/openwrt/)作为软件源，不会出现该问题，所以请务必连接好内网
+- 目前仅推荐OpenWrt，在Pandorabox中可能会因为架构问题无法安装python（顺便会出现无法预期的脚本运行错误），而在OpenWrt中使用[ 重庆大学开源软件镜像站](http://mirrors.cqu.edu.cn/openwrt/)作为软件源，不会出现该问题，所以请务必连接好内网
 - 本配置包集成了检测网络连接的功能
 - 配置包中的 `latest-wired.py` 填写账号密码，并将 `IS_TEST = False` 改为 `IS_TEST = True` 后可直接在电脑上使用
 
 ## 2.使用方法
 
-1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.2)，并解压
+1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.3)，并解压
 
 2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/root/` 路径下
 > Linux 下请执行：
@@ -51,6 +51,10 @@ drcom 自启动服务位于 `/etc/init.d/drcomctl`
  亦可以在 Luci (http://192.168.1.1 一般为此机的IP) System - Startup 中找到该管理的 luci app 。通过网页控制台进行管理。
 
 ## CHANGE LOG
+2020.08.31-2
+- 紧急修复由固件升级带来的脚本运行错误，***全面停止 Pandora Box 以及其他非 OpenWrt 官方固件的支持***，请不要因为 Pandora Box 无法使用来开新的 issue ，魔改 busybox 带来的运行变化和运行故障我们 ***无法解决***
+- 更改了配置文件编码问题带来的故障
+
 2020.08.31
 - 修改了部分变量沿用旧变量名称的错误
 - 更新了 B 区的配置文件
