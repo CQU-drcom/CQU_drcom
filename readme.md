@@ -14,9 +14,9 @@
 
 ## 2.使用方法
 
-1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2)，并解压
+1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.2)，并解压
 
-2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/tmp/` 路径下
+2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/root/` 路径下
 > Linux 下请执行：
 ```bash
 scp CQU_drcom* -r root@192.168.1.1:/root/
@@ -27,7 +27,7 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 4. 在 `putty` 中执行以下命令
 
    ``` bash
-   cd /tmp/CQU_drcom
+   cd
    sh setup.sh
    ```
 
@@ -51,6 +51,10 @@ drcom 自启动服务位于 `/etc/init.d/drcomctl`
  亦可以在 Luci (http://192.168.1.1 一般为此机的IP) System - Startup 中找到该管理的 luci app 。通过网页控制台进行管理。
 
 ## CHANGE LOG
+2020.08.31
+- 修改了部分变量沿用旧变量名称的错误
+- 更新了 B 区的配置文件
+
 2020.08.29
 - 修改了部分变量名称
 - 修复部署 drcom 时产生的 `permission denied` 的错误
@@ -64,7 +68,7 @@ HAPPY XMAS!
 - （上面部分的原因）由于固件升级以后有关 drcom 认证的部分被覆盖掉，但是网络设置的相关没必要更改，因此主体分支更改为判断是否进行了系统升级
 
 2019.11.22
-- 修正echo行为（@Hagb）
+- 修正echo行为（[@Hagb](https://github.com/hagb)）
 - 调整系统信息收集功能
 
 2019.09.18
