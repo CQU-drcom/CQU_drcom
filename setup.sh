@@ -5,8 +5,7 @@ DRCOM=drcom
 DRCOM_PATH=/usr/bin
 CONFIG_PATH=/etc
 
-if [[ ! -f "/etc/os-release"]]
-then
+if [ ! -f "/etc/os-release" ];then
 	echo "Recheck your package. You cannot run this script."
 	sleep 1
 	exit;
@@ -73,12 +72,10 @@ network_config() {
 
 # remove old file
 clean_up() {
-    if [ -f $CONFIG_PATH/$CONFIG ]
-    then
+    if [ -f "$CONFIG_PATH/$CONFIG" ];then
         mv $CONFIG_PATH/$CONFIG $CONFIG_PATH/$CONFIG.save
     fi
-    if [ -f $DRCOM_PATH/$DRCOM ]
-    then
+    if [ -f "$DRCOM_PATH/$DRCOM" ];then
         rm $DRCOM_PATH/$DRCOM $DRCOM_PATH/$DRCOM.save
     fi
 }
@@ -90,6 +87,7 @@ root_pwd_change() {
     Y|y|"")
         passwd root;;
     N|n)
+        # shellcheck disable=SC2104
         break;;
     esac
     clear
@@ -216,6 +214,7 @@ recheck() {
         echo "WIFI password for 2.4Ghz"
         echo "$wifi_password1" ;;
     N|n|*)
+        # shellcheck disable=SC2104
         break;;
     esac
 
@@ -241,46 +240,28 @@ recheck() {
 pss() {
     # setup python2
     echo "Setting up python2..."
-    case $distro in
-    "pandorabox")
-        python --version
-        if [ $? -ne 0 ]
-        then
-            echo "Install python-mini..."
-            opkg install zlib_1.2.8-1_ralink.ipk python-mini_2.7.3-2_ralink.ipk
-        fi
-        ;;
-    "openwrt")
-        echo "Change repositories..."
-        echo "Old opkg sources file will be installed as /etc/opkg/distfeeds.conf.save"
-        cp /etc/opkg/distfeeds.conf /etc/opkg/distfeeds.conf.save
-        sed -i 's/downloads.openwrt.org/mirrors.cqu.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
-        ping -c 1 mirrors.cqu.edu.cn
-        if [ $? -eq 0 ]
-        then
-            echo "Network is connected..."
-        else
-            echo "Failed... Please check your network connection."
-            exit 0
-        fi
-        opkg update
-        echo ""
-        echo "Installing python..."
-        opkg install python
-        ;;
-    esac
+    echo "Changing repositories..."
+    echo "Old opkg sources file will be installed as /etc/opkg/distfeeds.conf.save"
+    cp /etc/opkg/distfeeds.conf /etc/opkg/distfeeds.conf.save
+    sed -i 's/downloads.openwrt.org/mirrors.cqu.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf
+    ping -c 1 mirrors.cqu.edu.cn
+    if [ $? -eq 0 ]
+    then
+        echo "Network is connected..."
+    else
+        echo "Failed... Please check your network connection."
+        exit 0
+    fi
+    opkg update
+    echo ""
+    echo "Installing python..."
+    opkg install python
+
 
     #set up base64
     echo "Setting up coreutils-base64..."
+    opkg install coreutils-base64
 
-    case $distro in
-    "pandorabox")
-        opkg install coreutils-base64_8.16-1_ralink.ipk
-        ;;
-    "openwrt")
-        opkg install coreutils-base64
-        ;;
-    esac
 
     #setup drcom
     echo "Setting up Dr.com..."
@@ -289,7 +270,7 @@ pss() {
         echo "c2VydmVyID0gJzIwMi4yMDIuMC4xODAnCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCkNPTlRST0xDSEVDS1NUQVRVUyA9ICdceDIwJwpBREFQVEVSTlVNID0gJ1x4MDUnCmhvc3RfaXAgPSAnMTcyLjI0LjE1Mi44MScKSVBET0cgPSAnXHgwMScKaG9zdF9uYW1lID0gJ0dJTElHSUxJRVlFJwpQUklNQVJZX0ROUyA9ICcyMDIuMjAyLjAuMzMnCmRoY3Bfc2VydmVyID0gJzIwMi4yMDIuMi41MCcKQVVUSF9WRVJTSU9OID0gJ1x4MmZceDAwJwptYWMgPSAweDJjNjAwY2U4YzNjYgpob3N0X29zID0gJ05PVEU3JwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkY1x4MDInCnJvcl92ZXJzaW9uID0gRmFsc2UK" | base64 -d > $CONFIG
         ;;
     "b")
-        echo "77u/cwBlAHIAdgBlAHIAIAA9ACAAJwAyADAAMgAuADIAMAAyAC4AMAAuADEANgAzACcACgB1AHMAZQByAG4AYQBtAGUAPQAnACcACgBwAGEAcwBzAHcAbwByAGQAPQAnACcACgBDAE8ATgBUAFIATwBMAEMASABFAEMASwBTAFQAQQBUAFUAUwAgAD0AIAAnAFwAeAAyADAAJwAKAEEARABBAFAAVABFAFIATgBVAE0AIAA9ACAAJwBcAHgAMAA2ACcACgBoAG8AcwB0AF8AaQBwACAAPQAgACcAMQA3ADIALgAyADUALgAxADUANAAuADkANAAnAAoASQBQAEQATwBHACAAPQAgACcAXAB4ADAAMQAnAAoAaABvAHMAdABfAG4AYQBtAGUAIAA9ACAAJwBHAEkATABJAEcASQBMAEkARQBZAEUAJwAKAFAAUgBJAE0AQQBSAFkAXwBEAE4AUwAgAD0AIAAnADgALgA4AC4AOAAuADgAJwAKAGQAaABjAHAAXwBzAGUAcgB2AGUAcgAgAD0AIAAnADEAMAAuADEAMAAuADcALgA2ADYAJwAKAEEAVQBUAEgAXwBWAEUAUgBTAEkATwBOACAAPQAgACcAXAB4ADIANQBcAHgAMAAwACcACgBtAGEAYwAgAD0AIAAwAHgAMQAwADcAZAAxAGEAMQBmADAANwA5AGIACgBoAG8AcwB0AF8AbwBzACAAPQAgACcATgBPAFQARQAyADAAJwAKAEsARQBFAFAAXwBBAEwASQBWAEUAXwBWAEUAUgBTAEkATwBOACAAPQAgACcAXAB4AGQAOABcAHgAMAAyACcACgByAG8AcgBfAHYAZQByAHMAaQBvAG4AIAA9ACAARgBhAGwAcwBlAAo=" | base64 -d
+        echo "c2VydmVyID0gJzIwMi4yMDIuMC4xNjMnCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCkNPTlRST0xDSEVDS1NUQVRVUyA9ICdceDIwJwpBREFQVEVSTlVNID0gJ1x4MDYnCmhvc3RfaXAgPSAnMTcyLjI1LjE1NC45NCcKSVBET0cgPSAnXHgwMScKaG9zdF9uYW1lID0gJ0dJTElHSUxJRVlFJwpQUklNQVJZX0ROUyA9ICc4LjguOC44JwpkaGNwX3NlcnZlciA9ICcxMC4xMC43LjY2JwpBVVRIX1ZFUlNJT04gPSAnXHgyNVx4MDAnCm1hYyA9IDB4MTA3ZDFhMWYwNzliCmhvc3Rfb3MgPSAnTk9URTIwJwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkOFx4MDInCnJvcl92ZXJzaW9uID0gRmFsc2UK" |base64 -d > $CONFIG
         ;;
     "d")
         echo "c2VydmVyID0gJzIwMi4xLjEuMScKdXNlcm5hbWU9JycKcGFzc3dvcmQ9JycKQ09OVFJPTENIRUNLU1RBVFVTID0gJ1x4MDAnCkFEQVBURVJOVU0gPSAnXHgwMScKaG9zdF9pcCA9ICcxMC4yNTMuMTc4LjE0JwpJUERPRyA9ICdceDAxJwpob3N0X25hbWUgPSAnR0lMSUdJTElFWUUnClBSSU1BUllfRE5TID0gJzAuMC4wLjAnCmRoY3Bfc2VydmVyID0gJzEwLjI1My43LjcnCkFVVEhfVkVSU0lPTiA9ICdceDJmXHgwMCcKbWFjID0gMHhiMDI1YWEyMjdkNmIKaG9zdF9vcyA9ICdOT1RFNycKS0VFUF9BTElWRV9WRVJTSU9OID0gJ1x4ZGNceDAyJwpyb3JfdmVyc2lvbiA9IEZhbHNlIAo=" | base64 -d > $CONFIG
