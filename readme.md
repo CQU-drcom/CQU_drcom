@@ -14,7 +14,7 @@
 
 ## 2.使用方法
 
-1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.3)，并解压
+1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.4)，并解压
 
 2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/root/` 路径下
 > Linux 下请执行：
@@ -51,6 +51,10 @@ drcom 自启动服务位于 `/etc/init.d/drcomctl`
  亦可以在 Luci (http://192.168.1.1 一般为此机的IP) System - Startup 中找到该管理的 luci app 。通过网页控制台进行管理。
 
 ## CHANGE LOG
+2020.09.06
+- 修复因 `os-release` 大小写带来的配置问题 [#13](https://github.com/purefkh/CQU_drcom/issues/13)
+- 修改部分执行逻辑
+
 2020.08.31-2
 - 紧急修复由固件升级带来的脚本运行错误，***全面停止 Pandora Box 以及其他非 OpenWrt 官方固件的支持***，请不要因为 Pandora Box 无法使用来开新的 issue ，魔改 busybox 带来的运行变化和运行故障我们 ***无法解决***
 - 更改了配置文件编码问题带来的故障
