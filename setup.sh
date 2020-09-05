@@ -13,28 +13,10 @@ fi
 
 # import system information
 source /etc/os-release;
-distro=`echo $NAME | tr 'A-Z' 'a-z'`
-
+distro=`echo $NAME | tr 'A-Z' 'a-z'` # By purefkh, to set all capital letters to lower case
 
 # rewrite echo func By @Hagb
 echo() { printf '%s\n' "$*" ; }
-
-#uname -a | grep PandoraBox | grep -v grep
-#
-#if [ $? -ne 0 ]
-#then
-#   uname -a | grep Wrt | grep -v grep
-#   if [ $? -ne 0 ]
-#   then
-#        echo "You cannot use the setup script."
-#        exit 0
-#   else
-#     distro=openwrt
-#   fi
-#else
-#  distro=pandorabox
-#fi
-#clear
 
 # hello mates
 hello() {
@@ -45,7 +27,7 @@ hello() {
 
 # config network
 network_config() {
-    read -p "Manually config the network? [Y/n]: " ifSet_wan
+    read -p "Manually config the network? [y/N]: " ifSet_wan
     case $ifSet_wan in
     n|N|"")
         ;;
@@ -148,7 +130,7 @@ wlan_settings() {
     read -p "Change wifi ssid ? [Y/n]: " ifset_ssid
     case $ifset_ssid in
     Y|y|"")
-        read -p "Use different name? [Y/n]: " ifset_ssid_diff
+        read -p "Use different name? [y/N]: " ifset_ssid_diff
         case $ifset_ssid_diff in
         Y|y)
             read -p "Enter 5Ghz wifi SSID: " wifi_ssid0
@@ -171,7 +153,7 @@ wlan_settings() {
     read -p "Change your WIFI password ? [Y/n]: " ifChange
     case $ifChange in
     Y|y|"")
-        read -p "Use different password? [Y/n]: " ifset_passwd_diff
+        read -p "Use different password? [y/N]: " ifset_passwd_diff
         case $ifset_passwd_diff in
         Y|y)
             echo "Enter password for " "$wifi_ssid0"
@@ -237,7 +219,7 @@ recheck() {
     clear
 }
 
-pss() {
+setup_packages() {
     # setup python2
     echo "Setting up python2..."
     echo "Changing repositories..."
@@ -261,8 +243,9 @@ pss() {
     #set up base64
     echo "Setting up coreutils-base64..."
     opkg install coreutils-base64
+}
 
-
+setup_drcom() {
     #setup drcom
     echo "Setting up Dr.com..."
     case $campus in
@@ -276,7 +259,7 @@ pss() {
         echo "c2VydmVyID0gJzIwMi4xLjEuMScKdXNlcm5hbWU9JycKcGFzc3dvcmQ9JycKQ09OVFJPTENIRUNLU1RBVFVTID0gJ1x4MDAnCkFEQVBURVJOVU0gPSAnXHgwMScKaG9zdF9pcCA9ICcxMC4yNTMuMTc4LjE0JwpJUERPRyA9ICdceDAxJwpob3N0X25hbWUgPSAnR0lMSUdJTElFWUUnClBSSU1BUllfRE5TID0gJzAuMC4wLjAnCmRoY3Bfc2VydmVyID0gJzEwLjI1My43LjcnCkFVVEhfVkVSU0lPTiA9ICdceDJmXHgwMCcKbWFjID0gMHhiMDI1YWEyMjdkNmIKaG9zdF9vcyA9ICdOT1RFNycKS0VFUF9BTElWRV9WRVJTSU9OID0gJ1x4ZGNceDAyJwpyb3JfdmVyc2lvbiA9IEZhbHNlIAo=" | base64 -d > $CONFIG
         ;;
     esac
-    mv $DRCOM_ORIGIN $DRCOM
+    cp $DRCOM_ORIGIN $DRCOM #to avoid drcom not found
     sed -i "s/username=''/username=\'$username\'/g" $CONFIG
     sed -i "s/password=''/password=\'$(echo "$password" | sed 's/\\/\\\\\\\\/g;s/[&/]/\\&/g;s/'\''/\\\\'\'/g)\'/g" $CONFIG
 
@@ -305,13 +288,13 @@ pss() {
         }
         stop() {
             echo "[RUNNING] Stopping drcom..."
-            kill -9 $(pidof python)
+            kill -9 $(pidof python /usr/bin/drcom)
             sleep 1
             echo "[DONE] Drcom has been stopped."
         }
         restart() {
             echo "[RUNNING] Stopping drcom ... "
-            kill -9 $(pidof python);
+            kill -9 $(pidof python /usr/bin/drcom);
             sleep 1
             echo "[RUNNING] Restarting drcom ... "
             (/usr/bin/drcom > /dev/null &)&
@@ -334,25 +317,11 @@ pss() {
     echo "IyEgL3Vzci9iaW4vc2gKIyAvdXNyL2Jpbi9uZXR3b3JrQ2hlY2tpbmcuc2gKCmxvZz1+L25ldHdvcmtDaGVja2luZy5sb2cKaWYgWyAhIC1mICR7bG9nfSBdCnRoZW4KICAgIHRvdWNoICR7bG9nfQpmaQoKZHJfbG9nPX4vZHJjb20ubG9nCmlmIFsgISAtZiAke2RyX2xvZ30gXQp0aGVuCiAgICB0b3VjaCAke2RyX2xvZ30KZmkKCnBpbmcgLWMgMSBiYWlkdS5jb20gPiAvZGV2L251bGwgMj4mMQppZiBbICQ/IC1lcSAwIF0KdGhlbgogICAgZWNobyBgZGF0ZWAgICIuLi4uLi5PSy4uLi4uLiIgPiAke2xvZ30KICAgIGVjaG8gJE5VTEwgPiAke2RyX2xvZ30KZWxzZQogICAgZWNobyBgZGF0ZWAgIi4uLi4uLkZhaWxlZC4uLi4uLiIgPiAke2xvZ30KICAgIHBzIHwgZ3JlcCAidGltZW91dCwgcmV0cnlpbmciICR7ZHJfbG9nfSB8IGdyZXAgLXYgZ3JlcAogICAgaWYgWyAkPyAtZXEgMCBdCiAgICB0aGVuCiAgICAgICAgZWNobyAkTlVMTCA+ICR7ZHJfbG9nfQogICAgICAgIGVjaG8gYGRhdGVgICIuLi4uLi50aW1lb3V0Li4uLi4uIiA+PiAke2xvZ30KICAgICAgICByZWJvb3QKICAgIGZpCiAgICBwcyB8IGdyZXAgZHJjb20gfCBncmVwIC12IGdyZXAKICAgIGlmIFsgJD8gLW5lIDAgXQogICAgdGhlbgogICAgICAgIGVjaG8gIi4uLi4uLnN0YXJ0IGRyY29tLi4uLi4uIiA+PiAke2xvZ30KICAgIGVsc2UKICAgICAgICBlY2hvICIuLi4uLi5kcmNvbSBpcyBydW5uaW5nLCBraWxsLi4uLi4uIiA+PiAke2xvZ30KICAgICAgICBlY2hvICIuLi4uLi5zdGFydCBkcmNvbS4uLi4uLiIgPj4gJHtsb2d9CiAgICAgICAga2lsbCAtOSAkKHBpZG9mIHB5dGhvbiAvdXNyL2Jpbi9kcmNvbSkKICAgIGZpCiAgICBweXRob24gL3Vzci9iaW4vZHJjb20gPiAke2RyX2xvZ30gJgpmaQoK" | base64 -d > networkChecking.sh
     chmod a+x networkChecking.sh
 
-    #setup cron
-    case $ifSet in
-    Y|y)
-        echo "Set up cron..."
-        echo "Ki8xICogKiAqICogc2ggL3Vzci9iaW4vbmV0d29ya0NoZWNraW5nLnNoICYmIHNsZWVwIDMwICYmIHNoIC91c3IvYmluL25ldHdvcmtDaGVja2luZy5zaAoqICovOCAqICogKiBlY2hvICA+IH4vbmV0d29ya0NoZWNraW5nLmxvZwo=" | base64 -d > wrtcron
-        chmod a+x wrtcron
-        cp -p networkChecking.sh /usr/bin/
-        crontab wrtcron
-        /etc/init.d/cron restart
-        sleep 1s;;
-    N|n)
-        ;;
-    esac
-
     # Network Checking
         (/usr/bin/drcom > /dev/null &)&
         sh networkChecking.sh
         echo "Network checking..."
-        sleep 10s
+        sleep 2s
         ping -c 1 baidu.com > /dev/null 2>&1
 
         if [ $? -eq 0 ]
@@ -362,12 +331,26 @@ pss() {
         echo "Failed... Please contact me."
         exit 0
         fi
+}
 
-
+setup_crontab() {
+#setup cron
+		case $ifSet in
+		Y|y)
+				echo "Set up cron..."
+				echo "Ki8xICogKiAqICogc2ggL3Vzci9iaW4vbmV0d29ya0NoZWNraW5nLnNoICYmIHNsZWVwIDMwICYmIHNoIC91c3IvYmluL25ldHdvcmtDaGVja2luZy5zaAoqICovOCAqICogKiBlY2hvICA+IH4vbmV0d29ya0NoZWNraW5nLmxvZwo=" | base64 -d > wrtcron
+				chmod a+x wrtcron
+				cp -p networkChecking.sh /usr/bin/
+				crontab wrtcron
+				/etc/init.d/cron restart
+				sleep 1s;;
+		N|n)
+				;;
+		esac
 }
 
 #setup wireless interface
-pss_wlan() {
+setup_wlan() {
     case $ifChange in
     Y|y|"")
         if [[ $distro == "openwrt" ]]
@@ -389,7 +372,7 @@ pss_wlan() {
     esac
 }
 
-pss_done() {
+setup_done() {
     sleep 1s
     clear
     echo "Done. Enjoy!"
@@ -404,31 +387,35 @@ pss_done() {
     echo "--------------------"
 }
 # config renew after sys-upgrade
-read -p "Is is installation after system upgrade? [Y/n]: " ifSet_upgrade
+read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
 case $ifSet_upgrade in
     n|N|"")
         hello
-        network_config
-        clean_up
-        root_pwd_change
-        inform_gather
-        wlan_settings
-        recheck
-        pss
-        pss_wlan
-        pss_done
+				network_config
+				root_pwd_change
+				inform_gather
+				wlan_settings
+				recheck
+				clean_up
+				setup_packages
+				setup_drcom
+				setup_crontab
+				setup_wlan
+				setup_done
         ;;
     y|Y)
         wifi_ssid0="the one you have set"
         wifi_ssid1="the one you have set"
         wifi_password0="the one you have set"
         wifi_password1="the one you have set"
-        hello
-        network_config
-        clean_up
-        inform_gather
-        recheck
-        pss
+				hello
+				network_config
+				inform_gather
+				recheck
+				setup_packages
+				setup_drcom
+				setup_crontab
+				setup_done
         echo "All done!"
         ;;
 esac
