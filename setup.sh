@@ -125,7 +125,7 @@ inform_gather() {
     esac
 }
 
-wlan_settings() {
+wlan_ssid_settings() {
     # Change WIFI ssid
     read -p "Change wifi ssid ? [Y/n]: " ifset_ssid
     case $ifset_ssid in
@@ -148,7 +148,9 @@ wlan_settings() {
         wifi_ssid1=$distro
         ;;
     esac
+}
 
+wlan_passwd_setting() {
     # Wifi password
     read -p "Change your WIFI password ? [Y/n]: " ifChange
     case $ifChange in
@@ -203,13 +205,54 @@ recheck() {
     echo "Crontab:"
     echo $ifSet_cron
     echo ""
+}
+
+# give chances to reenter information
+config_choice_changes() {
+		echo "Choose the section to resetup from:"
+		echo "[1] campus"
+		echo "[2] student number"
+		echo "[3] password"
+		echo "[4] wifi SSID"
+		echo "[5] wifi password"
+		echo "[6] crontab"
+		echo "Press any other key to back to information recheck ..."
+		read -p  "Please input only the number of the section:" toChange
+		case $toChange in
+		1)
+				read -p "Please enter your campus(a/b/d): " campus
+				;;
+		2)
+				read -p "Please enter your Student number: " username
+				;;
+		3)
+				read -p "Please enter your password: " password
+				;;
+		4)
+				wlan_ssid_settings
+				;;
+		5)
+				wlan_passwd_setting
+				;;
+		6)
+				read -p "Set up cron? [Y/n]" ifSet
+				case $ifSet in
+				Y|y|"")
+						ifSet_cron=Yes;;
+				N|n)
+						ifSet_cron=no;;
+				esac
+				;;
+		esac
+
+}
+presetup_recheck() {
     read -p "Is the above information right? [Y/n]" solution
     case $solution in
     Y|y|"")
         echo "Good!";;
     N|n)
-        echo "Rerun setup.sh!"
-        exit 0;;
+        ;;
     *)
         echo "invalid input! Rerun."
         exit 0;;
