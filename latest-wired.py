@@ -65,7 +65,7 @@ if IS_TEST:
 
 def log(*args, **kwargs):
     s = ' '.join(args)
-    print s
+    print(s)
     if DEBUG:
         with open(LOG_PATH,'a') as f:
             f.write(s + '\n')
@@ -113,10 +113,10 @@ def gen_crc(data, encrypt_type):
     DRCOM_DIAL_EXT_PROTO_CRC_INIT = 20000711
     ret = ''
     if encrypt_type == 0:
-        # ¼ÓÃÜ·½Ê½ÎÞ
+        # ï¿½ï¿½ï¿½Ü·ï¿½Ê½ï¿½ï¿½
         return struct.pack('<I',DRCOM_DIAL_EXT_PROTO_CRC_INIT) + struct.pack('<I',126)
     elif encrypt_type == 1:
-        # ¼ÓÃÜ·½Ê½Îª md5
+        # ï¿½ï¿½ï¿½Ü·ï¿½Ê½Îª md5
         foo = hashlib.md5(data).digest()
         ret += foo[2]
         ret += foo[3]
