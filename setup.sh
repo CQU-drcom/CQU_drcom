@@ -447,42 +447,92 @@ setup_done() {
     echo "  you may find only one ssid of your routine in the list."
     echo "--------------------"
 }
-
-# config renew after sys-upgrade
-read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
-case $ifSet_upgrade in
-    n|N|"")
+if [[ $1 == "--dry-run" ]]; then
 				clear
+				echo "This flag is for test and will print most of the variables."
         hello
 				network_config
 				root_pwd_change
 				inform_gather
 				wlan_ssid_settings
 				wlan_passwd_setting
-#				recheck
 				setup_confirm
-				# clean_up
-				# setup_packages
-				# setup_drcom
-				# setup_crontab
-				# setup_wlan
 				setup_done
-        ;;
-    y|Y)
-				clear
-        wifi_ssid0="the one you have set"
-        wifi_ssid1="the one you have set"
-        wifi_password0="the one you have set"
-        wifi_password1="the one you have set"
-				hello
-				network_config
-				inform_gather
-				# recheck
-				setup_confirm
-				# setup_packages
-				# setup_drcom
-				# setup_crontab
-				setup_done
-        echo "All done!"
-        ;;
-esac
+else
+				# config renew after sys-upgrade
+				read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
+				case $ifSet_upgrade in
+						n|N|"")
+								clear
+								hello
+								network_config
+								root_pwd_change
+								inform_gather
+								wlan_ssid_settings
+								wlan_passwd_setting
+				#				recheck
+								setup_confirm
+								clean_up
+								setup_packages
+								setup_drcom
+								setup_crontab
+								setup_wlan
+								setup_done
+								;;
+						y|Y)
+								clear
+								wifi_ssid0="the one you have set"
+								wifi_ssid1="the one you have set"
+								wifi_password0="the one you have set"
+								wifi_password1="the one you have set"
+								hello
+								network_config
+								inform_gather
+								# recheck
+								setup_confirm
+								setup_packages
+								setup_drcom
+								setup_crontab
+								setup_done
+								echo "All done!"
+								;;
+				esac
+fi
+# config renew after sys-upgrade
+# read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
+# case $ifSet_upgrade in
+#     n|N|"")
+# 				clear
+#         hello
+# 				network_config
+# 				root_pwd_change
+# 				inform_gather
+# 				wlan_ssid_settings
+# 				wlan_passwd_setting
+# #				recheck
+# 				setup_confirm
+# 				clean_up
+# 				setup_packages
+# 				setup_drcom
+# 				setup_crontab
+# 				setup_wlan
+# 				setup_done
+#         ;;
+#     y|Y)
+# 				clear
+#         wifi_ssid0="the one you have set"
+#         wifi_ssid1="the one you have set"
+#         wifi_password0="the one you have set"
+#         wifi_password1="the one you have set"
+# 				hello
+# 				network_config
+# 				inform_gather
+# 				# recheck
+# 				setup_confirm
+# 				setup_packages
+# 				setup_drcom
+# 				setup_crontab
+# 				setup_done
+#         echo "All done!"
+#         ;;
+# esac
