@@ -49,7 +49,6 @@ network_config() {
         /etc/init.d/network restart
         ;;
     esac
-    sleep 1s
 }
 
 # remove old file
@@ -78,9 +77,9 @@ root_pwd_change() {
 #Gether information
 inform_gather() {
 
-    echo "1.A"
-    echo "2.B"
-    echo "3.D"
+    echo "[1] A"
+    echo "[2] B"
+    echo "[3] D"
     echo ""
 
     read -p "Please enter your campus: " CHOICE
@@ -116,7 +115,7 @@ inform_gather() {
     echo "which means the networkChecking script will run every 30 seconds and "
     echo "every 8 hour it will clean logs of drcom."
     echo ""
-    read -p "Set up cron? [Y/n]" ifSet
+    read -p "Set up cron? [Y/n]: " ifSet
     case $ifSet in
     Y|y|"")
         ifSet_cron=Yes;;
@@ -175,6 +174,7 @@ wlan_passwd_setting() {
     esac
 }
 
+
 # Information recheck
 recheck() {
     clear
@@ -209,58 +209,76 @@ recheck() {
 
 # give chances to reenter information
 config_choice_changes() {
-		echo "Choose the section to resetup from:"
-		echo "[1] campus"
-		echo "[2] student number"
-		echo "[3] password"
-		echo "[4] wifi SSID"
-		echo "[5] wifi password"
-		echo "[6] crontab"
-		echo "Press any other key to back to information recheck ..."
-		read -p  "Please input only the number of the section:" toChange
-		case $toChange in
-		1)
-				read -p "Please enter your campus(a/b/d): " campus
-				;;
-		2)
-				read -p "Please enter your Student number: " username
-				;;
-		3)
-				read -p "Please enter your password: " password
-				;;
-		4)
-				wlan_ssid_settings
-				;;
-		5)
-				wlan_passwd_setting
-				;;
-		6)
-				read -p "Set up cron? [Y/n]" ifSet
-				case $ifSet in
-				Y|y|"")
-						ifSet_cron=Yes;;
-				N|n)
-						ifSet_cron=no;;
+		while [ $confirm == "no" ]
+		do
+				clear
+				echo ""
+				echo "Choose the section to resetup from:"
+				echo "[1] campus"
+				echo "[2] student number"
+				echo "[3] password"
+				echo "[4] wifi SSID"
+				echo "[5] wifi password"
+				echo "[6] crontab"
+				echo "Or press any other key to back to information recheck ..."
+				read -p  "Please input only the number of the section: " toChange
+				case $toChange in
+				1)
+						read -p "Please enter your campus(a/b/d): " campus
+						;;
+				2)
+						read -p "Please enter your Student number: " username
+						;;
+				3)
+						read -p "Please enter your password: " password
+						;;
+				4)
+						wlan_ssid_settings
+						;;
+				5)
+						wlan_passwd_setting
+						;;
+				6)
+						read -p "Set up cron? [Y/n]" ifSet
+						case $ifSet in
+						Y|y|"")
+								ifSet_cron=Yes;;
+						N|n)
+								ifSet_cron=no;;
+						esac
+						;;
+				*)
+						confirm=yes
+						;;
 				esac
-				;;
-		esac
+		done
+}
+
+setup_confirm() {
+		while :
+		do
+				recheck
+				read -p "Is the above information right? [Y/n]: " solution
+				case $solution in
+				Y|y|"")
+						echo "Good!"
+						read -n1 -p "Press any key to continue installation... "
+						echo ""
+						clear
+						break
+						;;
+				N|n)
+						confirm=no
+						config_choice_changes
+						;;
+				*)
+						echo "invalid input!"
+						;;
+				esac
+		done
 
 }
-presetup_recheck() {
-    read -p "Is the above information right? [Y/n]" solution
-    case $solution in
-    Y|y|"")
-        echo "Good!";;
-    N|n)
-        ;;
-    *)
-        echo "invalid input! Rerun."
-        exit 0;;
-    esac
-    read -n1 -p "Press any key to continue installation... "
-    echo ""
-    clear
-}
+
 
 setup_packages() {
     # setup python2
@@ -429,24 +447,29 @@ setup_done() {
     echo "  you may find only one ssid of your routine in the list."
     echo "--------------------"
 }
+
 # config renew after sys-upgrade
 read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
 case $ifSet_upgrade in
     n|N|"")
+				clear
         hello
 				network_config
 				root_pwd_change
 				inform_gather
-				wlan_settings
-				recheck
-				clean_up
-				setup_packages
-				setup_drcom
-				setup_crontab
-				setup_wlan
+				wlan_ssid_settings
+				wlan_passwd_setting
+#				recheck
+				setup_confirm
+				# clean_up
+				# setup_packages
+				# setup_drcom
+				# setup_crontab
+				# setup_wlan
 				setup_done
         ;;
     y|Y)
+				clear
         wifi_ssid0="the one you have set"
         wifi_ssid1="the one you have set"
         wifi_password0="the one you have set"
@@ -454,10 +477,11 @@ case $ifSet_upgrade in
 				hello
 				network_config
 				inform_gather
-				recheck
-				setup_packages
-				setup_drcom
-				setup_crontab
+				# recheck
+				setup_confirm
+				# setup_packages
+				# setup_drcom
+				# setup_crontab
 				setup_done
         echo "All done!"
         ;;
