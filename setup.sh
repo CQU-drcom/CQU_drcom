@@ -13,7 +13,7 @@ fi
 
 # import system information
 source /etc/os-release;
-distro=$NAME
+distro=`echo $NAME | tr 'A-Z' 'a-z'`
 
 
 # rewrite echo func By @Hagb
@@ -45,7 +45,7 @@ hello() {
 
 # config network
 network_config() {
-    read -p "Manually config the network? [y/N]: " ifSet_wan
+    read -p "Manually config the network? [Y/n]: " ifSet_wan
     case $ifSet_wan in
     n|N|"")
         ;;
@@ -148,7 +148,7 @@ wlan_settings() {
     read -p "Change wifi ssid ? [Y/n]: " ifset_ssid
     case $ifset_ssid in
     Y|y|"")
-        read -p "Use different name? [y/N]: " ifset_ssid_diff
+        read -p "Use different name? [Y/n]: " ifset_ssid_diff
         case $ifset_ssid_diff in
         Y|y)
             read -p "Enter 5Ghz wifi SSID: " wifi_ssid0
@@ -171,7 +171,7 @@ wlan_settings() {
     read -p "Change your WIFI password ? [Y/n]: " ifChange
     case $ifChange in
     Y|y|"")
-        read -p "Use different password? [y/N]: " ifset_passwd_diff
+        read -p "Use different password? [Y/n]: " ifset_passwd_diff
         case $ifset_passwd_diff in
         Y|y)
             echo "Enter password for " "$wifi_ssid0"
@@ -404,7 +404,7 @@ pss_done() {
     echo "--------------------"
 }
 # config renew after sys-upgrade
-read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
+read -p "Is is installation after system upgrade? [Y/n]: " ifSet_upgrade
 case $ifSet_upgrade in
     n|N|"")
         hello
