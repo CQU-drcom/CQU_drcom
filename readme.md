@@ -34,6 +34,13 @@ scp CQU_drcom* -r root@192.168.1.1:/root/
 5. 如果返回联网失败，可稍后再次检查网络连通情况
 6. 享受路由器吧
 
+### 命令行选项
+```bash
+-V, --dry-run   Run the script without installation.
+-h, --help  Show help message.
+```
+
+
 ## 3.进程管理
 
 由于 OpenWrt 下 busybox 与一般 Linux 控制台没有太多差距，因此可以参照一般 Linux 控制台的使用方法去使用。 </br>
@@ -51,6 +58,11 @@ drcom 自启动服务位于 `/etc/init.d/drcomctl`
  亦可以在 Luci (http://192.168.1.1 一般为此机的IP) System - Startup 中找到该管理的 luci app 。通过网页控制台进行管理。
 
 ## CHANGE LOG
+2020.09.06-2
+- 修改运行逻辑
+- 添加了 `--dry-run` 作为运行选项方便测试
+- 使用 `getopts` 处理选项
+
 2020.09.06
 - 修复因 `os-release` 大小写带来的配置问题 [#13](https://github.com/purefkh/CQU_drcom/issues/13)
 - 修改部分执行逻辑
