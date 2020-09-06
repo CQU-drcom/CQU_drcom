@@ -14,7 +14,7 @@
 
 ## 2.使用方法
 
-1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.4)，并解压
+1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.4.1b)，并解压
 
 2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/root/` 路径下
 > Linux 下请执行：
