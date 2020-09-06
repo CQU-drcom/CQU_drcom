@@ -4,6 +4,13 @@ DRCOM_ORIGIN=latest-wired.py
 DRCOM=drcom
 DRCOM_PATH=/usr/bin
 CONFIG_PATH=/etc
+# for cli options
+# "-" option is to rewrite long options which getopts do not support.
+# ":" behind "-" is to undertake option string value of "-"
+# like "--debug" option, "-" is a short option undertaking "-debug",
+# and "debug" is the actual option handle by getopts
+optspec="-:Vh"
+
 
 if [ ! -f "/etc/os-release" ];then
 	echo "Recheck your package. You cannot run this script."
@@ -69,7 +76,7 @@ root_pwd_change() {
         passwd root;;
     N|n)
         # shellcheck disable=SC2104
-        break;;
+        pass;;
     esac
     clear
 }
@@ -199,7 +206,7 @@ recheck() {
         echo "$wifi_password1" ;;
     N|n|*)
         # shellcheck disable=SC2104
-        break;;
+        pass;;
     esac
 
     echo "Crontab:"
@@ -447,92 +454,112 @@ setup_done() {
     echo "  you may find only one ssid of your routine in the list."
     echo "--------------------"
 }
-if [[ $1 == "--dry-run" ]]; then
-				clear
-				echo "This flag is for test and will print most of the variables."
-        hello
-				network_config
-				root_pwd_change
-				inform_gather
-				wlan_ssid_settings
-				wlan_passwd_setting
-				setup_confirm
-				setup_done
-else
-				# config renew after sys-upgrade
-				read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
-				case $ifSet_upgrade in
-						n|N|"")
+
+setup_done_debug() {
+		echo "=========="
+		echo "Student number: "
+		echo $username
+		echo "Password: "
+		echo $password
+		echo "Wifi ssid (5Ghz) :" "$wifi_ssid0"
+		echo "Passwd :" "$wifi_password0"
+		echo "Wifi ssid (2.4Ghz) :" "$wifi_ssid1"
+		echo "Passwd :" "$wifi_password1"
+		echo "Crontab: "
+		echo $ifSet
+		echo "=========="
+		uname -a
+		echo $distro
+		cat /etc/os-release
+}
+
+# Handle actions without options
+if [ ! $1 ]; then
+		# config renew after sys-upgrade
+		read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
+		case $ifSet_upgrade in
+				n|N|"")
+						clear
+						hello
+						network_config
+						root_pwd_change
+						inform_gather
+						wlan_ssid_settings
+						wlan_passwd_setting
+		#				recheck
+						setup_confirm
+						clean_up
+						setup_packages
+						setup_drcom
+						setup_crontab
+						setup_wlan
+						setup_done
+						;;
+				y|Y)
+						clear
+						wifi_ssid0="the one you have set"
+						wifi_ssid1="the one you have set"
+						wifi_password0="the one you have set"
+						wifi_password1="the one you have set"
+						hello
+						network_config
+						inform_gather
+						# recheck
+						setup_confirm
+						setup_packages
+						setup_drcom
+						setup_crontab
+						setup_done
+						echo "All done!"
+						;;
+		esac
+else # When running with options
+		while getopts "$optspec" optchar; do
+				case $optchar in
+				-)
+						case $OPTARG in
+						dry-run)
 								clear
-								hello
+								echo "This flag is for test and will print most of the variables."
 								network_config
 								root_pwd_change
 								inform_gather
 								wlan_ssid_settings
 								wlan_passwd_setting
-				#				recheck
 								setup_confirm
-								clean_up
-								setup_packages
-								setup_drcom
-								setup_crontab
-								setup_wlan
-								setup_done
+								setup_done_debug
 								;;
-						y|Y)
-								clear
-								wifi_ssid0="the one you have set"
-								wifi_ssid1="the one you have set"
-								wifi_password0="the one you have set"
-								wifi_password1="the one you have set"
-								hello
-								network_config
-								inform_gather
-								# recheck
-								setup_confirm
-								setup_packages
-								setup_drcom
-								setup_crontab
-								setup_done
-								echo "All done!"
+						help)
+								echo ""
+								echo "USAGE: sh ./setup.sh [options]"
+								echo ""
+								echo "-V, --dry-run		Verbose. Run the scripts without actually setting up."
+								echo "-h, --help			Display this message."
 								;;
+						esac
+						;;
+				V)
+						clear
+						echo "This flag is for test and will print most of the variables."
+						hello
+						network_config
+						root_pwd_change
+						inform_gather
+						wlan_ssid_settings
+						wlan_passwd_setting
+						setup_confirm
+						setup_done_debug
+						;;
+				h)
+						echo "USAGE: sh ./setup.sh [options]"
+						echo "-V, --dry-run			Verbose. Run the scripts without actually setting up."
+						echo "-h, --help				Display this message."
+						;;
+				*)
+						if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
+                echo "Non-option argument: '-${OPTARG}'" >&2
+            fi
+						;;
 				esac
+		done
 fi
-# config renew after sys-upgrade
-# read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
-# case $ifSet_upgrade in
-#     n|N|"")
-# 				clear
-#         hello
-# 				network_config
-# 				root_pwd_change
-# 				inform_gather
-# 				wlan_ssid_settings
-# 				wlan_passwd_setting
-# #				recheck
-# 				setup_confirm
-# 				clean_up
-# 				setup_packages
-# 				setup_drcom
-# 				setup_crontab
-# 				setup_wlan
-# 				setup_done
-#         ;;
-#     y|Y)
-# 				clear
-#         wifi_ssid0="the one you have set"
-#         wifi_ssid1="the one you have set"
-#         wifi_password0="the one you have set"
-#         wifi_password1="the one you have set"
-# 				hello
-# 				network_config
-# 				inform_gather
-# 				# recheck
-# 				setup_confirm
-# 				setup_packages
-# 				setup_drcom
-# 				setup_crontab
-# 				setup_done
-#         echo "All done!"
-#         ;;
-# esac
