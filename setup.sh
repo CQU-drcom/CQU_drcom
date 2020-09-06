@@ -4,6 +4,13 @@ DRCOM_ORIGIN=latest-wired.py
 DRCOM=drcom
 DRCOM_PATH=/usr/bin
 CONFIG_PATH=/etc
+# for cli options
+# "-" option is to rewrite long options which getopts do not support.
+# ":" behind "-" is to undertake option string value of "-"
+# like "--debug" option, "-" is a short option undertaking "-debug",
+# and "debug" is the actual option handle by getopts
+optspec="-:Vh"
+
 
 if [ ! -f "/etc/os-release" ];then
 	echo "Recheck your package. You cannot run this script."
@@ -49,7 +56,6 @@ network_config() {
         /etc/init.d/network restart
         ;;
     esac
-    sleep 1s
 }
 
 # remove old file
@@ -70,7 +76,7 @@ root_pwd_change() {
         passwd root;;
     N|n)
         # shellcheck disable=SC2104
-        break;;
+        pass;;
     esac
     clear
 }
@@ -78,9 +84,9 @@ root_pwd_change() {
 #Gether information
 inform_gather() {
 
-    echo "1.A"
-    echo "2.B"
-    echo "3.D"
+    echo "[1] A"
+    echo "[2] B"
+    echo "[3] D"
     echo ""
 
     read -p "Please enter your campus: " CHOICE
@@ -116,7 +122,7 @@ inform_gather() {
     echo "which means the networkChecking script will run every 30 seconds and "
     echo "every 8 hour it will clean logs of drcom."
     echo ""
-    read -p "Set up cron? [Y/n]" ifSet
+    read -p "Set up cron? [Y/n]: " ifSet
     case $ifSet in
     Y|y|"")
         ifSet_cron=Yes;;
@@ -125,7 +131,7 @@ inform_gather() {
     esac
 }
 
-wlan_settings() {
+wlan_ssid_settings() {
     # Change WIFI ssid
     read -p "Change wifi ssid ? [Y/n]: " ifset_ssid
     case $ifset_ssid in
@@ -148,7 +154,9 @@ wlan_settings() {
         wifi_ssid1=$distro
         ;;
     esac
+}
 
+wlan_passwd_setting() {
     # Wifi password
     read -p "Change your WIFI password ? [Y/n]: " ifChange
     case $ifChange in
@@ -172,6 +180,7 @@ wlan_settings() {
         ;;
     esac
 }
+
 
 # Information recheck
 recheck() {
@@ -197,27 +206,86 @@ recheck() {
         echo "$wifi_password1" ;;
     N|n|*)
         # shellcheck disable=SC2104
-        break;;
+        pass;;
     esac
 
     echo "Crontab:"
     echo $ifSet_cron
     echo ""
-    read -p "Is the above information right? [Y/n]" solution
-    case $solution in
-    Y|y|"")
-        echo "Good!";;
-    N|n)
-        echo "Rerun setup.sh!"
-        exit 0;;
-    *)
-        echo "invalid input! Rerun."
-        exit 0;;
-    esac
-    read -n1 -p "Press any key to continue installation... "
-    echo ""
-    clear
 }
+
+# give chances to reenter information
+config_choice_changes() {
+		while [ $confirm == "no" ]
+		do
+				clear
+				echo ""
+				echo "Choose the section to resetup from:"
+				echo "[1] campus"
+				echo "[2] student number"
+				echo "[3] password"
+				echo "[4] wifi SSID"
+				echo "[5] wifi password"
+				echo "[6] crontab"
+				echo "Or press any other key to back to information recheck ..."
+				read -p  "Please input only the number of the section: " toChange
+				case $toChange in
+				1)
+						read -p "Please enter your campus(a/b/d): " campus
+						;;
+				2)
+						read -p "Please enter your Student number: " username
+						;;
+				3)
+						read -p "Please enter your password: " password
+						;;
+				4)
+						wlan_ssid_settings
+						;;
+				5)
+						wlan_passwd_setting
+						;;
+				6)
+						read -p "Set up cron? [Y/n]" ifSet
+						case $ifSet in
+						Y|y|"")
+								ifSet_cron=Yes;;
+						N|n)
+								ifSet_cron=no;;
+						esac
+						;;
+				*)
+						confirm=yes
+						;;
+				esac
+		done
+}
+
+setup_confirm() {
+		while :
+		do
+				recheck
+				read -p "Is the above information right? [Y/n]: " solution
+				case $solution in
+				Y|y|"")
+						echo "Good!"
+						read -n1 -p "Press any key to continue installation... "
+						echo ""
+						clear
+						break
+						;;
+				N|n)
+						confirm=no
+						config_choice_changes
+						;;
+				*)
+						echo "invalid input!"
+						;;
+				esac
+		done
+
+}
+
 
 setup_packages() {
     # setup python2
@@ -386,36 +454,112 @@ setup_done() {
     echo "  you may find only one ssid of your routine in the list."
     echo "--------------------"
 }
-# config renew after sys-upgrade
-read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
-case $ifSet_upgrade in
-    n|N|"")
-        hello
-				network_config
-				root_pwd_change
-				inform_gather
-				wlan_settings
-				recheck
-				clean_up
-				setup_packages
-				setup_drcom
-				setup_crontab
-				setup_wlan
-				setup_done
-        ;;
-    y|Y)
-        wifi_ssid0="the one you have set"
-        wifi_ssid1="the one you have set"
-        wifi_password0="the one you have set"
-        wifi_password1="the one you have set"
-				hello
-				network_config
-				inform_gather
-				recheck
-				setup_packages
-				setup_drcom
-				setup_crontab
-				setup_done
-        echo "All done!"
-        ;;
-esac
+
+setup_done_debug() {
+		echo "=========="
+		echo "Student number: "
+		echo $username
+		echo "Password: "
+		echo $password
+		echo "Wifi ssid (5Ghz) :" "$wifi_ssid0"
+		echo "Passwd :" "$wifi_password0"
+		echo "Wifi ssid (2.4Ghz) :" "$wifi_ssid1"
+		echo "Passwd :" "$wifi_password1"
+		echo "Crontab: "
+		echo $ifSet
+		echo "=========="
+		uname -a
+		echo $distro
+		cat /etc/os-release
+}
+
+# Handle actions without options
+if [ ! $1 ]; then
+		# config renew after sys-upgrade
+		read -p "Is is installation after system upgrade? [y/N]: " ifSet_upgrade
+		case $ifSet_upgrade in
+				n|N|"")
+						clear
+						hello
+						network_config
+						root_pwd_change
+						inform_gather
+						wlan_ssid_settings
+						wlan_passwd_setting
+		#				recheck
+						setup_confirm
+						clean_up
+						setup_packages
+						setup_drcom
+						setup_crontab
+						setup_wlan
+						setup_done
+						;;
+				y|Y)
+						clear
+						wifi_ssid0="the one you have set"
+						wifi_ssid1="the one you have set"
+						wifi_password0="the one you have set"
+						wifi_password1="the one you have set"
+						hello
+						network_config
+						inform_gather
+						# recheck
+						setup_confirm
+						setup_packages
+						setup_drcom
+						setup_crontab
+						setup_done
+						echo "All done!"
+						;;
+		esac
+else # When running with options
+		while getopts "$optspec" optchar; do
+				case $optchar in
+				-)
+						case $OPTARG in
+						dry-run)
+								clear
+								echo "This flag is for test and will print most of the variables."
+								network_config
+								root_pwd_change
+								inform_gather
+								wlan_ssid_settings
+								wlan_passwd_setting
+								setup_confirm
+								setup_done_debug
+								;;
+						help)
+								echo ""
+								echo "USAGE: sh ./setup.sh [options]"
+								echo ""
+								echo "-V, --dry-run		Verbose. Run the scripts without actually setting up."
+								echo "-h, --help			Display this message."
+								;;
+						esac
+						;;
+				V)
+						clear
+						echo "This flag is for test and will print most of the variables."
+						hello
+						network_config
+						root_pwd_change
+						inform_gather
+						wlan_ssid_settings
+						wlan_passwd_setting
+						setup_confirm
+						setup_done_debug
+						;;
+				h)
+						echo "USAGE: sh ./setup.sh [options]"
+						echo "-V, --dry-run			Verbose. Run the scripts without actually setting up."
+						echo "-h, --help				Display this message."
+						;;
+				*)
+						if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
+                echo "Non-option argument: '-${OPTARG}'" >&2
+            fi
+						;;
+				esac
+		done
+fi
