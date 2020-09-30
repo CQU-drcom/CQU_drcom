@@ -1,16 +1,21 @@
 #!/usr/bin/sh
 CONFIG=drcom.conf
+CONFIG_PATH=/etc
 DRCOM_ORIGIN=latest-wired.py
 DRCOM=drcom
 DRCOM_PATH=/usr/bin
-CONFIG_PATH=/etc
+VERSION_CQU_DRCOM='2.2.4.2a'
 # for cli options
 # "-" option is to rewrite long options which getopts do not support.
 # ":" behind "-" is to undertake option string value of "-"
 # like "--debug" option, "-" is a short option undertaking "-debug",
 # and "debug" is the actual option handle by getopts
-optspec="-:Vh"
-
+optspec="-:Vcvh"
+# - for long flag option
+# V for verbose option
+# c for config changes option
+# h for help option
+# v for version option
 
 if [ ! -f "/etc/os-release" ];then
 	echo "Recheck your package. You cannot run this script."
@@ -417,7 +422,7 @@ setup_crontab() {
 		esac
 }
 
-#setup wireless interface
+# setup wireless interface
 setup_wlan() {
     case $ifChange in
     Y|y|"")
@@ -473,6 +478,27 @@ setup_done_debug() {
 		cat /etc/os-release
 }
 
+# for end for process bar
+spin() {
+		sp='/-\|'
+		printf ' '
+		while true; do
+				printf '\b%.1s' "$sp"
+				sp=${sp#?}${sp%???}
+				sleep 0
+		done
+
+}
+
+# process bar
+progressbar()
+{
+       bar="##################################################"
+       barlength=${#bar}
+       n=$(($1*barlength/100))
+       printf "\r[%-${barlength}s (%d%%)] " "${bar:0:n}" "$1"
+}
+
 # Handle actions without options
 if [ ! $1 ]; then
 		# config renew after sys-upgrade
@@ -486,7 +512,6 @@ if [ ! $1 ]; then
 						inform_gather
 						wlan_ssid_settings
 						wlan_passwd_setting
-		#				recheck
 						setup_confirm
 						clean_up
 						setup_packages
@@ -504,7 +529,6 @@ if [ ! $1 ]; then
 						hello
 						network_config
 						inform_gather
-						# recheck
 						setup_confirm
 						setup_packages
 						setup_drcom
@@ -534,7 +558,13 @@ else # When running with options
 								echo "USAGE: sh ./setup.sh [options]"
 								echo ""
 								echo "-V, --dry-run		Verbose. Run the scripts without actually setting up."
+								echo "-c              Change config file."
 								echo "-h, --help			Display this message."
+								echo "-v, --version   Print version info."
+								;;
+						version)
+								echo "https://github.com/purefkh/CQU_drcom/"
+								echo "Version:" $VERSION_CQU_DRCOM
 								;;
 						esac
 						;;
@@ -554,6 +584,10 @@ else # When running with options
 						echo "USAGE: sh ./setup.sh [options]"
 						echo "-V, --dry-run			Verbose. Run the scripts without actually setting up."
 						echo "-h, --help				Display this message."
+						;;
+				c)
+						;;
+				v)
 						;;
 				*)
 						if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
