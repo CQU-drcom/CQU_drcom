@@ -1,64 +1,65 @@
 # 这是一个为懒人制作的路由器drcom一键配置包
-## 0.分支说明
-本分支为代码主分支，一般正常使用，较为稳定。
-***DEV*** 分支为测试分支，一般可使用。
-两分支区别在于 ***DEV*** 提供了更多选项（包含静态地址设置），而主分支（即本分）侧重于稳定以及通常情况下的快速配置，请按需选择。
+## 分支说明
+本脚本主要分为以下两个分支：
+- master: 相对更加稳定的分支
+- dev: 开发用分支，用来测试一些新的功能和实现
 
-## 1.注意事项：
-- 请刷入国内魔改固件或者部分论坛私有固件的同志 ***自行解决*** 出现的一切可能造成的包含：***损坏、异常使用*** 等情况。我们只保证来自 ***openwrt.org***的固件使用正常。Pandorabox、魔改版openwrt、pandavan不作任何保证可以正常使用。因此刷入以上固件的同志请保证自己具有 ***shell编程基础***
-- 适用于重庆大学AB校区及虎溪校区
-- 在OpenWrt<s>以及Pandorabox</s>上测试通过，请自行百度刷机方法
-- 目前仅推荐OpenWrt，在Pandorabox中可能会因为架构问题无法安装python（顺便会出现无法预期的脚本运行错误），而在OpenWrt中使用[ 重庆大学开源软件镜像站](http://mirrors.cqu.edu.cn/openwrt/)作为软件源，不会出现该问题，所以请务必连接好内网
-- 本配置包集成了检测网络连接的功能
-- 配置包中的 `latest-wired.py` 填写账号密码，并将 `IS_TEST = False` 改为 `IS_TEST = True` 后可直接在电脑上使用
+通常情况下请使用主分支即 master 分支的代码，在 release 部分为 stable release 。这部分代码通常经过了多次试验确保在一般情况下能够正常使用。
 
-## 2.使用方法
+## 使用事项
+请先查阅 **针对此项目的说明** 部分。</br>
 
+通过 [GITHUB release](https://github.com/purefkh/CQU_drcom/releases) 下载当前的 **稳定版本** 进行使用。通常稳定版本会带有 Stable Release 字样。并上传至路由器存储进行使用。
+需要准备的工具:
+
+|操作系统|需要的工具或工具集|
+|:--|---|
+| Windows | Winscp 及 putty 或 XShell |
+| OS X / Mac OS |默认终端（确保具有 openssh )|
+| Linux 或 FreeBSD 等|默认终端模拟器（确保安装了 openssh ）|
+
+具体使用方法如下：
 1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.4.1b)，并解压
-
-2. 使用 `winscp工具` 将解压后的文件中**setup.sh**和**latest-wired.py**上传到路由器的 `/root/` 路径下
-> Linux 下请执行：
+2. 将配置包上传至路由器空间：
+ - Windows：使用 Winscp 工具登录路由器并将 `setup.sh` 和 `latest-wired.py` 拖入文件夹 `/root/`
+ - 配置了 openssh-beta 的 Windows 或者 Mac OS 以及 Linux：
+  ```bash
+  # 默认你已经知道如何切换到解压后的目录
+  scp latest-wired.py setup.sh USERNAME@IP:PORT:/PATH_TO_FILE/.
+  ```
+  一般情况下我们需要执行如下指令：
+  ```bash
+  scp latest-wired.py setup.sh root@192.168.1.1:/root/.
+  ```
+3. 使用任意终端工具登入路由器，并执行以下指令：
 ```bash
-scp CQU_drcom* -r root@192.168.1.1:/root/
+sh setup.sh
 ```
+4. 设置其他信息并完成设置
 
-3. 使用 `putty` 等ssh工具，登录你的路由器
+## [其他帮助信息](https://github.com/purefkh/CQU_drcom/tree/master/DOCS/DOCS.md)
 
-4. 在 `putty` 中执行以下命令
+## 针对此项目的说明
+- 这个配置包理论上适用于任何具有内网镜像站并且收录了 OpenWrt 并通过 drcom 进行认证登录的校园网环境路由器软件配置
+- 默认情况下此配置包包含了校内三种认证设置的配置
+- 仅仅在 OpenWrt 上测试通过，如果很不幸你的路由器只能刷入 PandoraBox ，也请不要着急：请参照 drcom-generic 项目获取配置文件并放入相应位置，只需要设置好自启动仍然可以享受路由器。详细内容请参照：[此帮助文件](https://github.com/purefkh/CQU_drcom/tree/master/DOCS/TESTED.md)
+- 由于使用了重庆大学开源软件镜像站：https://mirrors.cqu.edu.cn 作为访问 OpenWrt 仓库的媒介，因此请务必确认好网络已连接上
 
-   ``` bash
-   cd
-   sh setup.sh
-   ```
+## **特殊说明**
+1. 此脚本存在网路连接的不确定性：即因为需要检测网络连通情况所以需要 ping 一下内网中某服务器，但是由于内网的不确定性目前不能保证每次都成功
+2. 学校更新了配置文件：请重新抓包，或等待我们将新配置文件上传
 
-5. 如果返回联网失败，可稍后再次检查网络连通情况
-6. 享受路由器吧
+## F&Q
+- - Q: 为什么我无法连接重大开源镜像站？（请检测网络连通性）
+  - A: 请检查网线、网络端口是否正常。如正常请考虑你是否处在办公区域，这些区域需要使用分配的网络配置进行初步的联网
+- - Q: 为什么最后网络检查失败但实际网络已经连接上？
+  - A: 通常通过脚本进行拨号有一定时延，就算我们努力的将挺多时间拉长到更久仍可能出现此问题。如果确认网络已经连接上，请无视这个错误。
 
-### 命令行选项
-```bash
--V, --dry-run   Run the script without installation.
--h, --help  Show help message.
-```
+## 已测试的设备及说明：
+[帮助文件](https://github.com/purefkh/CQU_drcom/tree/master/DOCS/TESTED.md)
 
+## [CHANGE LOG](https://github.com/purefkh/CQU_drcom/tree/master/CHANGELOG/changelog.md)
 
-## 3.进程管理
-
-由于 OpenWrt 下 busybox 与一般 Linux 控制台没有太多差距，因此可以参照一般 Linux 控制台的使用方法去使用。 </br>
-drcom 自启动服务位于 `/etc/init.d/drcomctl`
- ```bash
- # 启动服务
- /etc/init.d/drcomctl start
- # 关闭服务
- /etc/init.d/drcomctl stop
- # 重启服务
- /etc/init.d/drcomctl restart
- # 设置自动启动
- /etc/init.d/drcomctl enable
- ```
- 亦可以在 Luci (http://192.168.1.1 一般为此机的IP) System - Startup 中找到该管理的 luci app 。通过网页控制台进行管理。
-
-## [CHANGE LOG](https://github.com/purefkh/CQU_drcom/CHANGELOG/changelog.md)
- 
 ## 许可证
 
 AGPLv3
