@@ -6,8 +6,8 @@
 # Lenovo newifi y1 mini
 ## 固件选择
 ### OpenWrt
-机型主页：https://openwrt.org/toh/hwdata/lenovo/lenovo_newifi_mini_y1
-最新稳定版本：18.06.5（无法再通过 download.openwrt.org 下载）
+机型主页：https://openwrt.org/toh/hwdata/lenovo/lenovo_newifi_mini_y1</br>
+最新稳定版本：18.06.5（无法再通过 download.openwrt.org 下载）</br>
 其他版本： SNAPSHOT
 ### PandoraBox
 ## 配置指南
@@ -34,8 +34,8 @@ opkg install luci
 # Lenovo newifi y1s
 ## 固件选择
 ### OpenWrt
-机型主页：https://openwrt.org/toh/hwdata/lenovo/lenovo_newifi_y1s
-最新稳定版本：19.07.3
+机型主页：https://openwrt.org/toh/hwdata/lenovo/lenovo_newifi_y1s</br>
+最新稳定版本：19.07.3</br>
 其他版本：SNAPSHOT
 ## 配置指南
 1. uboot 直接输入固件，后期可直接在 Luci 刷入新固件（必须为 OpenWrt）
@@ -45,9 +45,9 @@ opkg install luci
 # Lenovo newifi 3
 ## 固件选择
 ### OpenWrt
-机型主页：https://openwrt.org/toh/hwdata/d-team/d-team_newifi_d2
-最新稳定版本：19.07.3
-其他版本：SNAPSHOT
+机型主页：https://openwrt.org/toh/hwdata/d-team/d-team_newifi_d2</br>
+最新稳定版本：19.07.3</br>
+其他版本：SNAPSHOT</br>
 ## 配置指南
 1. uboot 直接输入固件，后期可直接在 Luci 刷入新固件（必须为 OpenWrt）
 2. 将脚本文件放入存储，控制台直接运行脚本即可
