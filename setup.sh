@@ -330,8 +330,8 @@ setup_drcom() {
         ;;
     esac
     cp $DRCOM_ORIGIN $DRCOM #to avoid drcom not found
-    sed -i "s/username=''/username=\'$username\'/g" $CONFIG
-    sed -i "s/password=''/password=\'$(echo "$password" | sed 's/\\/\\\\\\\\/g;s/[&/]/\\&/g;s/'\''/\\\\'\'/g)\'/g" $CONFIG
+    echo "username = '$username'" >> $CONFIG
+    echo "password = \"$(echo "$password" | sed 's/[\"\\]/\\&/g')\"" >> $CONFIG
 
     #set up startup service
     echo "Setting up startup service..."
