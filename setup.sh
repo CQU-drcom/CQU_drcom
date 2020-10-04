@@ -4,6 +4,8 @@ DRCOM_ORIGIN=latest-wired.py
 DRCOM=drcom
 DRCOM_PATH=/usr/bin
 CONFIG_PATH=/etc
+DRCOMLOG=/var/log/drcom.log
+NETLOG=/var/log/networkChecking.log
 # for cli options
 # "-" option is to rewrite long options which getopts do not support.
 # ":" behind "-" is to undertake option string value of "-"
@@ -117,7 +119,7 @@ inform_gather() {
     # Crontab setting confirm
     echo "The cron is a schedule for script to run. It's like:"
     echo "*/1 * * * * sh /usr/bin/networkChecking.sh && sleep 30 && sh /usr/bin/networkChecking.sh"
-    echo "* */8 * * * echo $NULL > ~/networkChecking.log"
+    echo "* */8 * * * echo $NULL > '$NETLOG'"
     echo ""
     echo "which means the networkChecking script will run every 30 seconds and "
     echo "every 8 hour it will clean logs of drcom."
@@ -339,7 +341,7 @@ setup_drcom() {
         # /etc/hotplug.d/iface/99-drcom
         if [ "$ACTION" = ifup ]; then
             if [ "${INTERFACE}" = "wan" ]; then
-                sleep 10 && python /usr/bin/drcom > ~/drcom.log &
+                sleep 10 && python /usr/bin/drcom >' "'$DRCOMLOG'" '&
             fi
         fi' > 99-drcom
         chmod a+x 99-drcom
@@ -382,7 +384,13 @@ setup_drcom() {
     sleep 1s
 
     #setup networkChecking
-    echo "IyEgL3Vzci9iaW4vc2gKIyAvdXNyL2Jpbi9uZXR3b3JrQ2hlY2tpbmcuc2gKCmxvZz1+L25ldHdvcmtDaGVja2luZy5sb2cKaWYgWyAhIC1mICR7bG9nfSBdCnRoZW4KICAgIHRvdWNoICR7bG9nfQpmaQoKZHJfbG9nPX4vZHJjb20ubG9nCmlmIFsgISAtZiAke2RyX2xvZ30gXQp0aGVuCiAgICB0b3VjaCAke2RyX2xvZ30KZmkKCnBpbmcgLWMgMSBiYWlkdS5jb20gPiAvZGV2L251bGwgMj4mMQppZiBbICQ/IC1lcSAwIF0KdGhlbgogICAgZWNobyBgZGF0ZWAgICIuLi4uLi5PSy4uLi4uLiIgPiAke2xvZ30KICAgIGVjaG8gJE5VTEwgPiAke2RyX2xvZ30KZWxzZQogICAgZWNobyBgZGF0ZWAgIi4uLi4uLkZhaWxlZC4uLi4uLiIgPiAke2xvZ30KICAgIHBzIHwgZ3JlcCAidGltZW91dCwgcmV0cnlpbmciICR7ZHJfbG9nfSB8IGdyZXAgLXYgZ3JlcAogICAgaWYgWyAkPyAtZXEgMCBdCiAgICB0aGVuCiAgICAgICAgZWNobyAkTlVMTCA+ICR7ZHJfbG9nfQogICAgICAgIGVjaG8gYGRhdGVgICIuLi4uLi50aW1lb3V0Li4uLi4uIiA+PiAke2xvZ30KICAgICAgICByZWJvb3QKICAgIGZpCiAgICBwcyB8IGdyZXAgZHJjb20gfCBncmVwIC12IGdyZXAKICAgIGlmIFsgJD8gLW5lIDAgXQogICAgdGhlbgogICAgICAgIGVjaG8gIi4uLi4uLnN0YXJ0IGRyY29tLi4uLi4uIiA+PiAke2xvZ30KICAgIGVsc2UKICAgICAgICBlY2hvICIuLi4uLi5kcmNvbSBpcyBydW5uaW5nLCBraWxsLi4uLi4uIiA+PiAke2xvZ30KICAgICAgICBlY2hvICIuLi4uLi5zdGFydCBkcmNvbS4uLi4uLiIgPj4gJHtsb2d9CiAgICAgICAga2lsbCAtOSAkKHBpZG9mIHB5dGhvbiAvdXNyL2Jpbi9kcmNvbSkKICAgIGZpCiAgICBweXRob24gL3Vzci9iaW4vZHJjb20gPiAke2RyX2xvZ30gJgpmaQoK" | base64 -d > networkChecking.sh
+    echo "#!/usr/bin/sh
+    # /usr/bin/networkChecking.sh
+    log='$NETLOG'
+    dr_log='$DRCOMLOG'" > networkChecking.sh
+    echo "
+    aWYgWyAhIC1mICR7bG9nfSBdCnRoZW4KICAgIHRvdWNoICR7bG9nfQpmaQoKaWYgWyAhIC1mICR7ZHJfbG9nfSBdICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAp0aGVuICAgICAgICAgICAgICAgICAKICAgIHRvdWNoICR7ZHJfbG9nfQpmaQoKcGluZyAtYyAxIGJhaWR1LmNvbSA+IC9kZXYvbnVsbCAyPiYxCmlmIFsgJD8gLWVxIDAgXQp0aGVuCiAgICBlY2hvIGBkYXRlYCAgIi4uLi4uLk9LLi4uLi4uIiA+ICR7bG9nfQogICAgZWNobyAkTlVMTCA+ICR7ZHJfbG9nfQplbHNlCiAgICBlY2hvIGBkYXRlYCAiLi4uLi4uRmFpbGVkLi4uLi4uIiA+ICR7bG9nfQogICAgcHMgfCBncmVwICJ0aW1lb3V0LCByZXRyeWluZyIgJHtkcl9sb2d9IHwgZ3JlcCAtdiBncmVwCiAgICBpZiBbICQ/IC1lcSAwIF0KICAgIHRoZW4KICAgICAgICBlY2hvICROVUxMID4gJHtkcl9sb2d9CiAgICAgICAgZWNobyBgZGF0ZWAgIi4uLi4uLnRpbWVvdXQuLi4uLi4iID4+ICR7bG9nfQogICAgICAgIHJlYm9vdAogICAgZmkKICAgIHBzIHwgZ3JlcCBkcmNvbSB8IGdyZXAgLXYgZ3JlcAogICAgaWYgWyAkPyAtbmUgMCBdCiAgICB0aGVuCiAgICAgICAgZWNobyAiLi4uLi4uc3RhcnQgZHJjb20uLi4uLi4iID4+ICR7bG9nfQogICAgZWxzZQogICAgICAgIGVjaG8gIi4uLi4uLmRyY29tIGlzIHJ1bm5pbmcsIGtpbGwuLi4uLi4iID4+ICR7bG9nfQogICAgICAgIGVjaG8gIi4uLi4uLnN0YXJ0IGRyY29tLi4uLi4uIiA+PiAke2xvZ30KICAgICAgICBraWxsIC05ICQocGlkb2YgcHl0aG9uIC91c3IvYmluL2RyY29tKQogICAgZmkKICAgIHB5dGhvbiAvdXNyL2Jpbi9kcmNvbSA+ICR7ZHJfbG9nfSAmCmZpCg==
+    " | base64 -d >> networkChecking.sh
     chmod a+x networkChecking.sh
 
     # Network Checking
@@ -406,7 +414,8 @@ setup_crontab() {
 		case $ifSet in
 		Y|y)
 				echo "Set up cron..."
-				echo "Ki8xICogKiAqICogc2ggL3Vzci9iaW4vbmV0d29ya0NoZWNraW5nLnNoICYmIHNsZWVwIDMwICYmIHNoIC91c3IvYmluL25ldHdvcmtDaGVja2luZy5zaAoqICovOCAqICogKiBlY2hvICA+IH4vbmV0d29ya0NoZWNraW5nLmxvZwo=" | base64 -d > wrtcron
+				echo "*/1 * * * * sh /usr/bin/networkChecking.sh && sleep 30 && sh /usr/bin/networkChecking.sh
+				* */8 * * * echo  > '$NETLOG'" | base64 -d > wrtcron
 				chmod a+x wrtcron
 				cp -p networkChecking.sh /usr/bin/
 				crontab wrtcron
