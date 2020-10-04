@@ -350,7 +350,7 @@ setup_drcom() {
         START=99
         start() {
             echo "[RUNNING] Starting drcom service..."
-            (/usr/bin/drcom > /dev/null &)&
+            (/usr/bin/drcom > ' "'$DRCOMLOG'" ' &)&
             sleep 1
             echo "[DONE] Start drcom service succesfully."
         }
@@ -365,7 +365,7 @@ setup_drcom() {
             kill -9 $(pidof python /usr/bin/drcom);
             sleep 1
             echo "[RUNNING] Restarting drcom ... "
-            (/usr/bin/drcom > /dev/null &)&
+            (/usr/bin/drcom > ' "'$DECOMLOG'" ' &)&
             sleep 2
             echo "[DONE] Drcom restart succesfully."
         }' > drcomctl
@@ -386,7 +386,7 @@ setup_drcom() {
     chmod a+x networkChecking.sh
 
     # Network Checking
-        (/usr/bin/drcom > /dev/null &)&
+        (/usr/bin/drcom > "$DRCOMLOG" &)&
         sh networkChecking.sh
         echo "Network checking..."
         sleep 2s
