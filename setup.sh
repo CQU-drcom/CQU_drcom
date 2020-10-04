@@ -367,7 +367,7 @@ setup_drcom() {
             kill -9 $(pidof python /usr/bin/drcom);
             sleep 1
             echo "[RUNNING] Restarting drcom ... "
-            (/usr/bin/drcom > ' "'$DECOMLOG'" ' &)&
+            (/usr/bin/drcom > ' "'$DRCOMLOG'" ' &)&
             sleep 2
             echo "[DONE] Drcom restart succesfully."
         }' > drcomctl
