@@ -138,6 +138,7 @@ inform_gather() {
     echo "[2] micropython-drcom with micopython - smaller then python2."
     echo ""
     echo "**Note:"
+    echo "    There is no longer python2 package in OpenWrt snapshot."
     echo "    If choosing micropython-drcom, please download the micropython-drcom-with-lib"
     echo "    ipkg package from https://github.com/Hagb/micropython-drcom/releases/ and"
     echo "    put it in `pwd`/micropython-drcom-with-lib.ipk"
@@ -145,6 +146,10 @@ inform_gather() {
 
     read -p "Please enter enter the drcom client you want: " CHOICE
     case $CHOICE in
+        "")
+            echo ""
+            echo "You choose the default option drcom-generic"
+            drcom=python2;;
         1)
             echo ""
             echo "You choose drcom-generic"
@@ -424,14 +429,7 @@ setup_drcom() {
         echo "installing drcom to /usr/bin/drcom-python2"
         cp -p drcom /usr/bin/drcom-python2
         chmod +x /usr/bin/drcom-python2
-        echo '#!/bin/sh
-        while true
-        do
-                /usr/bin/drcom-python2 &
-                echo $$ $! >' "'$DRCOM_PID'" '
-                wait
-                sleep 2
-	done' > /usr/bin/drcom
+        drcom_exec=/usr/bin/drcom-python2
     else
         echo "installing micropython-drcom"
         opkg install micropython-drcom-with-lib.ipk || {
@@ -440,17 +438,19 @@ setup_drcom() {
 	}
         mv /etc/drcom_wired.conf /etc/drcom_wired.conf.save
         ln -s /etc/$CONFIG /etc/drcom_wired.conf
-	echo '#!/bin/sh
+        drcom_exec=/usr/bin/drcom-wired
+    fi
+    echo '#!/bin/sh
 	while true
 	do
-                /usr/bin/drcom-wired &
-		echo $$ $! >' "'$DRCOM_PID'" '
+              '"'$drcom_exec'"' &
+                echo $$ $! >' "'$DRCOM_PID'" '
                 wait
+                echo $$ >' "'$DRCOM_PID'" '
                 sleep 2
         done' > /usr/bin/drcom
-    fi
     chmod a+x /usr/bin/drcom
-    echo "installing drcom.conf to /etc/drcom.conf"
+    echo "Installing drcom.conf to /etc/drcom.conf"
     cp -p $CONFIG /etc/
     sleep 1s
 
@@ -459,7 +459,7 @@ setup_drcom() {
     # /usr/bin/networkChecking.sh
     log='$NETLOG'
     dr_log='$DRCOMLOG'" > networkChecking.sh
-    echo "IyEvYmluL3NoCmlmIFsgISAtZiAke2xvZ30gXQp0aGVuCiAgICB0b3VjaCAke2xvZ30KZmkKCmlmIFsgISAtZiAke2RyX2xvZ30gXSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKdGhlbiAgICAgICAgICAgICAgICAgCiAgICB0b3VjaCAke2RyX2xvZ30KZmkKCnBpbmcgLWMgMSBiYWlkdS5jb20gPiAvZGV2L251bGwgMj4mMQppZiBbICQ/IC1lcSAwIF0KdGhlbgogICAgZWNobyBgZGF0ZWAgICIuLi4uLi5PSy4uLi4uLiIgPiAke2xvZ30KICAgIGVjaG8gJE5VTEwgPiAke2RyX2xvZ30KZWxzZQogICAgZWNobyBgZGF0ZWAgIi4uLi4uLkZhaWxlZC4uLi4uLiIgPiAke2xvZ30KICAgIHBzIHwgZ3JlcCAidGltZW91dCwgcmV0cnlpbmciICR7ZHJfbG9nfSB8IGdyZXAgLXYgZ3JlcAogICAgaWYgWyAkPyAtZXEgMCBdCiAgICB0aGVuCiAgICAgICAgZWNobyAkTlVMTCA+ICR7ZHJfbG9nfQogICAgICAgIGVjaG8gYGRhdGVgICIuLi4uLi50aW1lb3V0Li4uLi4uIiA+PiAke2xvZ30KICAgICAgICByZWJvb3QKICAgIGZpCiAgICBwcyB8IGdyZXAgZHJjb20gfCBncmVwIC12IGdyZXAKICAgIGlmIFsgJD8gLW5lIDAgXQogICAgdGhlbgogICAgICAgIGVjaG8gIi4uLi4uLnN0YXJ0IGRyY29tLi4uLi4uIiA+PiAke2xvZ30KICAgIGVsc2UKICAgICAgICBlY2hvICIuLi4uLi5kcmNvbSBpcyBydW5uaW5nLCBraWxsLi4uLi4uIiA+PiAke2xvZ30KICAgICAgICBlY2hvICIuLi4uLi5zdGFydCBkcmNvbS4uLi4uLiIgPj4gJHtsb2d9CiAgICAgICAga2lsbCAtOSAkKGNhdCAvdmFyL3J1bi9kcmNvbS13cmFwcGVyLnBpZCkKCXJtIC92YXIvcnVuL2RyY29tLXdyYXBwZXIucGlkCiAgICBmaQogICAgL3Vzci9iaW4vZHJjb20gPiAke2RyX2xvZ30gJgpmaQo=" | base64 -d >> networkChecking.sh
+    echo "aWYgWyAhIC1mICR7bG9nfSBdCnRoZW4KICAgIHRvdWNoICR7bG9nfQpmaQoKaWYgWyAhIC1mICR7ZHJfbG9nfSBdICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAp0aGVuICAgICAgICAgICAgICAgICAKICAgIHRvdWNoICR7ZHJfbG9nfQpmaQoKcGluZyAtYyAxIGJhaWR1LmNvbSA+IC9kZXYvbnVsbCAyPiYxCmlmIFsgJD8gLWVxIDAgXQp0aGVuCiAgICBlY2hvIGBkYXRlYCAgIi4uLi4uLk9LLi4uLi4uIiA+ICR7bG9nfQogICAgZWNobyAkTlVMTCA+ICR7ZHJfbG9nfQplbHNlCiAgICBlY2hvIGBkYXRlYCAiLi4uLi4uRmFpbGVkLi4uLi4uIiA+ICR7bG9nfQogICAgcHMgfCBncmVwICJ0aW1lb3V0LCByZXRyeWluZyIgJHtkcl9sb2d9IHwgZ3JlcCAtdiBncmVwCiAgICBpZiBbICQ/IC1lcSAwIF0KICAgIHRoZW4KICAgICAgICBlY2hvICROVUxMID4gJHtkcl9sb2d9CiAgICAgICAgZWNobyBgZGF0ZWAgIi4uLi4uLnRpbWVvdXQuLi4uLi4iID4+ICR7bG9nfQogICAgICAgIHJlYm9vdAogICAgZmkKICAgIHBzIHwgZ3JlcCBkcmNvbSB8IGdyZXAgLXYgZ3JlcAogICAgaWYgWyAkPyAtbmUgMCBdCiAgICB0aGVuCiAgICAgICAgZWNobyAiLi4uLi4uc3RhcnQgZHJjb20uLi4uLi4iID4+ICR7bG9nfQogICAgZWxzZQogICAgICAgIGVjaG8gIi4uLi4uLmRyY29tIGlzIHJ1bm5pbmcsIGtpbGwuLi4uLi4iID4+ICR7bG9nfQogICAgICAgIGVjaG8gIi4uLi4uLnN0YXJ0IGRyY29tLi4uLi4uIiA+PiAke2xvZ30KICAgICAgICBraWxsIC05ICQoY2F0IC92YXIvcnVuL2RyY29tLXdyYXBwZXIucGlkKQogICAgICAgIHJtIC92YXIvcnVuL2RyY29tLXdyYXBwZXIucGlkCiAgICAgICAgL3Vzci9iaW4vZHJjb20gPiAke2RyX2xvZ30gJgogICAgZmkKZmkK" | base64 -d >> networkChecking.sh
     chmod a+x networkChecking.sh
 
     # Network Checking
