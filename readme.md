@@ -11,7 +11,7 @@
 
 ## 2.使用方法
 
-1. 下载`release`中的`DEV Release`
+1. 下载`release`中的`DEV Release`，如果要使用 [micropython](https://github.com/micropython/micropython) 版本的 drcom，还需下载 [micropython-drcom-with-lib](https://github.com/Hagb/micropython-drcom/releases/) 的 ipk 包，将该 ipk 包命名为 `micropython-drcom-with-lib.ipk` 保存到解压后的文件夹。
 
 2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/root/` 路径下
 > Linux 下请执行：
