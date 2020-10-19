@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 CONFIG=drcom.conf
 DRCOM_ORIGIN=latest-wired.py
 DRCOM=drcom
@@ -6,6 +6,7 @@ DRCOM_PATH=/usr/bin
 CONFIG_PATH=/etc
 DRCOMLOG=/var/log/drcom.log
 NETLOG=/var/log/networkChecking.log
+DRCOM_PID=/var/run/drcom-wrapper.pid
 # for cli options
 # "-" option is to rewrite long options which getopts do not support.
 # ":" behind "-" is to undertake option string value of "-"
@@ -131,6 +132,37 @@ inform_gather() {
     N|n)
         ifSet_cron=no;;
     esac
+
+    echo "Please enter the drcom client you want"
+    echo "[1] drcom-generic with python2 - the default client"
+    echo "[2] micropython-drcom with micopython - smaller then python2."
+    echo ""
+    echo "**Note:"
+    echo "    There is no longer python2 package in OpenWrt snapshot."
+    echo "    If choosing micropython-drcom, please download the micropython-drcom-with-lib"
+    echo "    ipkg package from https://github.com/Hagb/micropython-drcom/releases/ and"
+    echo "    put it in `pwd`/micropython-drcom-with-lib.ipk"
+    echo ""
+
+    read -p "Please enter enter the drcom client you want: " CHOICE
+    case $CHOICE in
+        "")
+            echo ""
+            echo "You choose the default option drcom-generic"
+            drcom=python2;;
+        1)
+            echo ""
+            echo "You choose drcom-generic"
+            drcom=python2;;
+        2)
+            echo ""
+            echo "You choose micropython-drcom"
+            drcom=micropy;;
+        *)
+            echo ""
+            echo "Error! Please run the program again."
+            exit 0;;
+    esac
 }
 
 wlan_ssid_settings() {
@@ -199,6 +231,8 @@ recheck() {
     echo "$wifi_ssid1"
     echo "Change WIFI password:"
     echo $ifChange
+    echo "DrCOM client:"
+    echo "the $drcom version"
 
     case $ifChange in
     Y|y|"")
@@ -229,6 +263,7 @@ config_choice_changes() {
 				echo "[4] wifi SSID"
 				echo "[5] wifi password"
 				echo "[6] crontab"
+				echo "[7] drcom client"
 				echo "Or press any other key to back to information recheck ..."
 				read -p  "Please input only the number of the section: " toChange
 				case $toChange in
@@ -255,6 +290,9 @@ config_choice_changes() {
 						N|n)
 								ifSet_cron=no;;
 						esac
+						;;
+				7)
+						read -p "Please enter the drcom client you want (python2/micropy): " drcom
 						;;
 				*)
 						confirm=yes
@@ -290,8 +328,8 @@ setup_confirm() {
 
 
 setup_packages() {
-    # setup python2
-    echo "Setting up python2..."
+
+    echo "Setting up package..."
     echo "Changing repositories..."
     echo "Old opkg sources file will be installed as /etc/opkg/distfeeds.conf.save"
     cp /etc/opkg/distfeeds.conf /etc/opkg/distfeeds.conf.save
@@ -305,10 +343,17 @@ setup_packages() {
         exit 0
     fi
     opkg update
-    echo ""
-    echo "Installing python..."
-    opkg install python
 
+    echo ""
+    if [ "$drcom" != micropy ]
+    then
+    # setup python2
+        echo "Installing python..."
+        opkg install python
+    else
+        echo "Installing micropython..."
+        opkg install micropython
+    fi
 
     #set up base64
     echo "Setting up coreutils-base64..."
@@ -341,7 +386,7 @@ setup_drcom() {
         # /etc/hotplug.d/iface/99-drcom
         if [ "$ACTION" = ifup ]; then
             if [ "${INTERFACE}" = "wan" ]; then
-                sleep 10 && python /usr/bin/drcom >' "'$DRCOMLOG'" '&
+                sleep 10 && /usr/bin/drcom >' "'$DRCOMLOG'" '&
             fi
         fi' > 99-drcom
         chmod a+x 99-drcom
@@ -351,20 +396,23 @@ setup_drcom() {
         echo '#!/bin/sh /etc/rc.common
         START=99
         start() {
-            echo "[RUNNING] Starting drcom service..."
+            echo "[RUNNING] Starting drcom service..."\
+            stop  >/dev/null
             (/usr/bin/drcom > ' "'$DRCOMLOG'" ' &)&
             sleep 1
             echo "[DONE] Start drcom service succesfully."
         }
         stop() {
             echo "[RUNNING] Stopping drcom..."
-            kill -9 $(pidof python /usr/bin/drcom)
+            kill -9 $(cat' "'$DRCOM_PID'" ')
+            rm' "'$DRCOM_PID'" '
             sleep 1
             echo "[DONE] Drcom has been stopped."
         }
         restart() {
             echo "[RUNNING] Stopping drcom ... "
-            kill -9 $(pidof python /usr/bin/drcom);
+            kill -9 $(cat' "'$DRCOM_PID'" ');
+            rm' "'$DRCOM_PID'" '
             sleep 1
             echo "[RUNNING] Restarting drcom ... "
             (/usr/bin/drcom > ' "'$DRCOMLOG'" ' &)&
@@ -376,10 +424,33 @@ setup_drcom() {
         /etc/init.d/drcomctl enable
         ;;
     esac
-
-    echo "installing drcom to /usr/bin/drcom"
-    echo "installing drcom.conf to /etc/drcom.conf"
-    cp -p drcom /usr/bin/ && chmod a+x /usr/bin/drcom
+    if [ "$drcom" != micropy ]
+    then
+        echo "installing drcom to /usr/bin/drcom-python2"
+        cp -p drcom /usr/bin/drcom-python2
+        chmod +x /usr/bin/drcom-python2
+        drcom_exec=/usr/bin/drcom-python2
+    else
+        echo "installing micropython-drcom"
+        opkg install micropython-drcom-with-lib.ipk || {
+                echo "Failed to install micropython-drcom! exit"
+                exit 1
+	}
+        mv /etc/drcom_wired.conf /etc/drcom_wired.conf.save
+        ln -s /etc/$CONFIG /etc/drcom_wired.conf
+        drcom_exec=/usr/bin/drcom-wired
+    fi
+    echo '#!/bin/sh
+	while true
+	do
+              '"'$drcom_exec'"' &
+                echo $$ $! >' "'$DRCOM_PID'" '
+                wait
+                echo $$ >' "'$DRCOM_PID'" '
+                sleep 2
+        done' > /usr/bin/drcom
+    chmod a+x /usr/bin/drcom
+    echo "Installing drcom.conf to /etc/drcom.conf"
     cp -p $CONFIG /etc/
     sleep 1s
 
@@ -388,7 +459,7 @@ setup_drcom() {
     # /usr/bin/networkChecking.sh
     log='$NETLOG'
     dr_log='$DRCOMLOG'" > networkChecking.sh
-    echo "aWYgWyAhIC1mICR7bG9nfSBdCnRoZW4KICAgIHRvdWNoICR7bG9nfQpmaQoKaWYgWyAhIC1mICR7ZHJfbG9nfSBdICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAp0aGVuICAgICAgICAgICAgICAgICAKICAgIHRvdWNoICR7ZHJfbG9nfQpmaQoKcGluZyAtYyAxIGJhaWR1LmNvbSA+IC9kZXYvbnVsbCAyPiYxCmlmIFsgJD8gLWVxIDAgXQp0aGVuCiAgICBlY2hvIGBkYXRlYCAgIi4uLi4uLk9LLi4uLi4uIiA+ICR7bG9nfQogICAgZWNobyAkTlVMTCA+ICR7ZHJfbG9nfQplbHNlCiAgICBlY2hvIGBkYXRlYCAiLi4uLi4uRmFpbGVkLi4uLi4uIiA+ICR7bG9nfQogICAgcHMgfCBncmVwICJ0aW1lb3V0LCByZXRyeWluZyIgJHtkcl9sb2d9IHwgZ3JlcCAtdiBncmVwCiAgICBpZiBbICQ/IC1lcSAwIF0KICAgIHRoZW4KICAgICAgICBlY2hvICROVUxMID4gJHtkcl9sb2d9CiAgICAgICAgZWNobyBgZGF0ZWAgIi4uLi4uLnRpbWVvdXQuLi4uLi4iID4+ICR7bG9nfQogICAgICAgIHJlYm9vdAogICAgZmkKICAgIHBzIHwgZ3JlcCBkcmNvbSB8IGdyZXAgLXYgZ3JlcAogICAgaWYgWyAkPyAtbmUgMCBdCiAgICB0aGVuCiAgICAgICAgZWNobyAiLi4uLi4uc3RhcnQgZHJjb20uLi4uLi4iID4+ICR7bG9nfQogICAgZWxzZQogICAgICAgIGVjaG8gIi4uLi4uLmRyY29tIGlzIHJ1bm5pbmcsIGtpbGwuLi4uLi4iID4+ICR7bG9nfQogICAgICAgIGVjaG8gIi4uLi4uLnN0YXJ0IGRyY29tLi4uLi4uIiA+PiAke2xvZ30KICAgICAgICBraWxsIC05ICQocGlkb2YgcHl0aG9uIC91c3IvYmluL2RyY29tKQogICAgZmkKICAgIHB5dGhvbiAvdXNyL2Jpbi9kcmNvbSA+ICR7ZHJfbG9nfSAmCmZpCg==" | base64 -d >> networkChecking.sh
+    echo "aWYgWyAhIC1mICR7bG9nfSBdCnRoZW4KICAgIHRvdWNoICR7bG9nfQpmaQoKaWYgWyAhIC1mICR7ZHJfbG9nfSBdICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAp0aGVuICAgICAgICAgICAgICAgICAKICAgIHRvdWNoICR7ZHJfbG9nfQpmaQoKcGluZyAtYyAxIGJhaWR1LmNvbSA+IC9kZXYvbnVsbCAyPiYxCmlmIFsgJD8gLWVxIDAgXQp0aGVuCiAgICBlY2hvIGBkYXRlYCAgIi4uLi4uLk9LLi4uLi4uIiA+ICR7bG9nfQogICAgZWNobyAkTlVMTCA+ICR7ZHJfbG9nfQplbHNlCiAgICBlY2hvIGBkYXRlYCAiLi4uLi4uRmFpbGVkLi4uLi4uIiA+ICR7bG9nfQogICAgcHMgfCBncmVwICJ0aW1lb3V0LCByZXRyeWluZyIgJHtkcl9sb2d9IHwgZ3JlcCAtdiBncmVwCiAgICBpZiBbICQ/IC1lcSAwIF0KICAgIHRoZW4KICAgICAgICBlY2hvICROVUxMID4gJHtkcl9sb2d9CiAgICAgICAgZWNobyBgZGF0ZWAgIi4uLi4uLnRpbWVvdXQuLi4uLi4iID4+ICR7bG9nfQogICAgICAgIHJlYm9vdAogICAgZmkKICAgIHBzIHwgZ3JlcCBkcmNvbSB8IGdyZXAgLXYgZ3JlcAogICAgaWYgWyAkPyAtbmUgMCBdCiAgICB0aGVuCiAgICAgICAgZWNobyAiLi4uLi4uc3RhcnQgZHJjb20uLi4uLi4iID4+ICR7bG9nfQogICAgZWxzZQogICAgICAgIGVjaG8gIi4uLi4uLmRyY29tIGlzIHJ1bm5pbmcsIGtpbGwuLi4uLi4iID4+ICR7bG9nfQogICAgICAgIGVjaG8gIi4uLi4uLnN0YXJ0IGRyY29tLi4uLi4uIiA+PiAke2xvZ30KICAgICAgICBraWxsIC05ICQoY2F0IC92YXIvcnVuL2RyY29tLXdyYXBwZXIucGlkKQogICAgICAgIHJtIC92YXIvcnVuL2RyY29tLXdyYXBwZXIucGlkCiAgICAgICAgL3Vzci9iaW4vZHJjb20gPiAke2RyX2xvZ30gJgogICAgZmkKZmkK" | base64 -d >> networkChecking.sh
     chmod a+x networkChecking.sh
 
     # Network Checking
