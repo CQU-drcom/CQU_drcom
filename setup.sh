@@ -141,6 +141,11 @@ inform_gather() {
             ifSet_cron=no;;
     esac
 
+    
+}
+
+client_setting() {
+    clear
     echo "Please enter the drcom client you want"
     echo "[1] drcom-generic with python2 - the default client"
     echo "[2] micropython-drcom with micopython - smaller then python2."
@@ -158,15 +163,15 @@ inform_gather() {
         "")
             echo ""
             echo "You choose the default option drcom-generic"
-            drcom=python2;;
+            CLIENT=python2;;
         1)
             echo ""
             echo "You choose drcom-generic"
-            drcom=python2;;
+            CLIENT=python2;;
         2)
             echo ""
             echo "You choose micropython-drcom"
-            drcom=micropy;;
+            CLIENT=micropy;;
         *)
             echo ""
             echo "Error! Please run the program again."
@@ -301,9 +306,7 @@ config_choice_changes() {
                 esac
                 ;;
             7)
-                read -p "Please enter drcom client to be installed $(
-                        )(python2/micropy): "\
-                    drcom
+                client_setting
                 ;;
             *)
                 confirm=yes
@@ -356,7 +359,7 @@ setup_packages() {
     opkg update
 
     echo ""
-    if [ "$drcom" != micropy ] ; then
+    if [ "$CLIENT" != micropy ] ; then
         # setup python2
         echo "Installing python..."
         opkg install python
@@ -474,7 +477,7 @@ setup_drcom() {
     (/usr/bin/drcom > "$DRCOMLOG" &)&
     sh networkChecking.sh
     echo "Network checking..."
-    sleep 2s
+    sleep 5s
     ping -c 1 baidu.com > /dev/null 2>&1
 
     if [ $? -eq 0 ] ; then
@@ -570,6 +573,7 @@ if [ ! $1 ]; then
             inform_gather
             wlan_ssid_settings
             wlan_passwd_setting
+            client_setting
             #				recheck
             setup_confirm
             clean_up
@@ -588,6 +592,7 @@ if [ ! $1 ]; then
             hello
             network_config
             inform_gather
+            client_setting
             # recheck
             setup_confirm
             setup_packages
@@ -610,6 +615,7 @@ else # When running with options
                         inform_gather
                         wlan_ssid_settings
                         wlan_passwd_setting
+                        client_setting
                         setup_confirm
                         setup_done_debug
                         ;;
@@ -631,6 +637,7 @@ else # When running with options
                 inform_gather
                 wlan_ssid_settings
                 wlan_passwd_setting
+                client_setting
                 setup_confirm
                 setup_done_debug
                 ;;
