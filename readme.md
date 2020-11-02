@@ -50,6 +50,10 @@ scp CQU_drcom* -r root@192.168.1.1:/root/.
 ```
 所有有關的控制項目可至`Luci` -> `System - Startup` -> `Initscripts`尋找。
 ## CHANGE LOG
+2020.11.02
+- 合并 [pr#]23(https://github.com/purefkh/CQU_drcom/pull/23) asign @hagb
+- 将客户端选择拆出
+
 2020.09.06-2
 - 使用 `getopts` 来处理选项
 - 修正无选项时运行错误的问题
