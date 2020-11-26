@@ -247,7 +247,7 @@ recheck() {
     echo "Change WIFI password:"
     echo $ifChange
     echo "DrCOM client:"
-    echo "the $drcom version"
+    echo "the $CLIENT version"
 
     case $ifChange in
         Y|y|"")
@@ -437,7 +437,7 @@ setup_drcom() {
                     /etc/init.d/drcomctl enable
                     ;;
             esac
-            if [ "$drcom" != micropy ] ; then
+            if [ "$CLIENT" != micropy ] ; then
                 echo "installing drcom to /usr/bin/drcom-python2"
                 cp -p drcom /usr/bin/drcom-python2
                 chmod +x /usr/bin/drcom-python2
