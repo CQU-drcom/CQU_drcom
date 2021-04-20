@@ -1,4 +1,8 @@
 ## Change Log
+2021.04.21
+- 由 @Hagb 添加了micropython drcom
+- 更新了配置文件
+- Bump to `2.2.4.2b`
 
 2020.09.06-2
 - 修改运行逻辑
