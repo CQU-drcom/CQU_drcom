@@ -146,6 +146,7 @@ inform_gather() {
 
 client_setting() {
     clear
+    clear
     echo "Please enter the drcom client you want"
     echo "[1] drcom-generic with python2 - the default client"
     echo "[2] micropython-drcom with micopython - smaller then python2."
