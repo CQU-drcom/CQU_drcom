@@ -1,104 +1,67 @@
-# 测试用分支
+# 这是一个为懒人制作的路由器drcom一键配置包
+## 分支说明
+本脚本主要分为以下两个分支：
+- master: 相对更加稳定的分支
+- dev: 开发用分支，用来测试一些新的功能和实现
 
-## 1.注意事项：
-0. 本分支相较于主分支侧重点不同，更加倾向于为用户尽可能提供更多可控制项。
-1. 适用于重庆大学AB校区及虎溪校区，原则上替换配置文件以及镜像后适用于所有使用哆点认证校园网的学校。
-2. 在OpenWrt以及Pandorabox上均测试通过，请自行百度刷机方法。原本为为newifi y1s单独设计，现支援openwrt后均可使用。
-3. 推荐使用OpenWrt官方提供的固件，不推荐任何论坛等的魔改固件，此外Pandorabox已不被积极的开发，出现的任何问题请自行解决。在OpenWrt中使用[ 重庆大学开源软件镜像站](http://mirrors.cqu.edu.cn/openwrt/)作为软件源，所以请务必连接好内网。
-4. 本配置包集成了检测网络连接的功能（目前本分支上不可用，正在积极修复）
-5. 一切有关drcom-generic的问题请到[drcom-generic](https://github.com/drcom-generic)下提问。
-6. 请仔细阅读提问的智慧。
+通常情况下请使用主分支即 master 分支的代码，在 release 部分为 stable release 。这部分代码通常经过了多次试验确保在一般情况下能够正常使用。
 
-## 2.使用方法
+## 使用事项
+请先查阅 **针对此项目的说明** 部分。</br>
 
-1. 下载`release`中的`DEV Release`，如果要使用 [micropython](https://github.com/micropython/micropython) 版本的 drcom，还需下载 [micropython-drcom-with-lib](https://github.com/Hagb/micropython-drcom/releases/) 的 ipk 包，将该 ipk 包命名为 `micropython-drcom-with-lib.ipk` 保存到解压后的文件夹。
+通过 [GITHUB release](https://github.com/purefkh/CQU_drcom/releases) 下载当前的 **稳定版本** 进行使用。通常稳定版本会带有 Stable Release 字样。并上传至路由器存储进行使用。
+需要准备的工具:
 
-2. 使用 `winscp工具` 将 __解压后的文件夹__ 上传到路由器的 `/root/` 路径下
-> Linux 下请执行：
+|操作系统|需要的工具或工具集|
+|:--|---|
+| Windows | Winscp 及 putty 或 XShell |
+| OS X / Mac OS |默认终端（确保具有 openssh )|
+| Linux 或 FreeBSD 等|默认终端模拟器（确保安装了 openssh ）|
+
+具体使用方法如下：
+1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.4.1b)，并解压
+2. 将配置包上传至路由器空间：
+ - Windows：使用 Winscp 工具登录路由器并将 `setup.sh` 和 `latest-wired.py` 拖入文件夹 `/root/`
+ - 配置了 openssh-beta 的 Windows 或者 Mac OS 以及 Linux：
+  ```bash
+  # 默认你已经知道如何切换到解压后的目录
+  scp latest-wired.py setup.sh USERNAME@IP:PORT:/PATH_TO_FILE/.
+  ```
+  一般情况下我们需要执行如下指令：
+  ```bash
+  scp latest-wired.py setup.sh root@192.168.1.1:/root/.
+  ```
+3. 使用任意终端工具登入路由器，并执行以下指令：
 ```bash
-scp CQU_drcom* -r root@192.168.1.1:/root/.
+sh setup.sh
 ```
+4. 设置其他信息并完成设置
 
-3. 使用 `putty` 等ssh工具，登录你的路由器
+## [其他帮助信息](https://github.com/purefkh/CQU_drcom/tree/master/DOCS/DOCS.md)
 
-4. 在 `putty` 中执行以下命令
+## 针对此项目的说明
+- 这个配置包理论上适用于任何具有内网镜像站并且收录了 OpenWrt 并通过 drcom 进行认证登录的校园网环境路由器软件配置
+- 默认情况下此配置包包含了校内三种认证设置的配置
+- 仅仅在 OpenWrt 上测试通过，如果很不幸你的路由器只能刷入 PandoraBox ，也请不要着急：请参照 drcom-generic 项目获取配置文件并放入相应位置，只需要设置好自启动仍然可以享受路由器。详细内容请参照：[此帮助文件](https://github.com/purefkh/CQU_drcom/tree/master/DOCS/TESTED.md)
+- 由于使用了重庆大学开源软件镜像站：https://mirrors.cqu.edu.cn 作为访问 OpenWrt 仓库的媒介，因此请务必确认好网络已连接上
 
-   ``` bash
-   cd CQU_drcom
-   sh setup.sh
-   ```
+## **特殊说明**
+1. 此脚本存在网路连接的不确定性：即因为需要检测网络连通情况所以需要 ping 一下内网中某服务器，但是由于内网的不确定性目前不能保证每次都成功
+2. 学校更新了配置文件：请重新抓包，或等待我们将新配置文件上传
 
-5. 如果返回联网失败，可稍后再次检查网络连通情况
+## F&Q
+- - Q: 为什么我无法连接重大开源镜像站？（请检测网络连通性）
+  - A: 请检查网线、网络端口是否正常。如正常请考虑你是否处在办公区域，这些区域需要使用分配的网络配置进行初步的联网
+- - Q: 为什么最后网络检查失败但实际网络已经连接上？
+  - A: 通常通过脚本进行拨号有一定时延，就算我们努力的将挺多时间拉长到更久仍可能出现此问题。如果确认网络已经连接上，请无视这个错误。
 
-## 关于运行选项
-```bash
--V 或 --dry-run    用于测试脚本（仅运行，不进行任何设置）
--h 或 --help       显示帮助信息
-```
+## 已测试的设备及说明：
+[帮助文件](https://github.com/purefkh/CQU_drcom/tree/master/DOCS/TESTED.md)
 
-## 關於啓動腳本
-位置: `/etc/init.d/drcomctl`
-```sh
-#stop drcom
-/etc/init.d/drcomctl stop
-#restart drcom
-/etc/init.d/drcomctl restart
-#start drcom
-/etc/init.d/drcomctl start
-#enable drcom at system start
-/etc/init.d/drcomctl enable
-```
-所有有關的控制項目可至`Luci` -> `System - Startup` -> `Initscripts`尋找。
-## CHANGE LOG
-2020.11.02
-- 合并 [pr#]23(https://github.com/purefkh/CQU_drcom/pull/23) asign @hagb
-- 将客户端选择拆出
-
-2020.09.06-2
-- 使用 `getopts` 来处理选项
-- 修正无选项时运行错误的问题
-
-2020.09.06
-- 添加了循环判断，用于当信息填写有误时的修改而不用重新运行脚本
-- 添加了 `--dry-run` 运行选项以方便进行测试
-
-2020.08 - 2020.09.05
-- 修正配置更改
-- 修正部分变量错误引用
-- 修正 `distro` 变量不能正确获取的问题
-
-2020.05.28
-- 重写网络连通性判断部分，尝试以 http code 作为核验对象以减小对服务器的负担
-
-2019.12.25
-HAPPY XMAS!
-- 重写部分功能，添加所有功能为函数，在主体部分直接按照步骤调用即可
-- （上面部分的原因）由于固件升级以后有关 drcom 认证的部分被覆盖掉，但是网络设置的相关没必要更改，因此主体分支更改为判断是否进行了系统升级
-
-2019.11.22
-- 修正echo行为（@Hagb）
-- 调整系统信息收集功能
-
-2019.09.18
-- 替换了虎溪校区配置文件为最新版本
-
-2019.09.16
-- 修正了啓動腳本`99-drcom`中的錯誤
-
-2019.09.14
-- 修正了ESSID显示错误的问题
-- 修正了WiFi开启后无SSID的问题
-- 修正了部分流程
-- 增加了设置静态IP的功能（意味着可用于研究生办公室以及部分实验室区域）
-- 增加了base64编码方式
-- 去除了冗余文件
-
-2019.09.12
-- 修复了开启WiFi电源后无E SSID的问题
+## [CHANGE LOG](https://github.com/purefkh/CQU_drcom/tree/master/CHANGELOG/changelog.md)
 
 ## 许可证
-其余部分除openwrt预编译包外均遵循GPLv3许可证 ，请勿用作商用。
-### drcom-generic
+
 AGPLv3
 
 特别指出禁止任何个人或者公司将 [drcoms](http://github.com/drcoms/) 的代码投入商业使用，由此造成的后果和法律责任均与本人无关。

@@ -1,6 +1,7 @@
 #!/bin/ash
 # shellcheck shell=ash
 CONFIG=drcom.conf
+CONFIG_PATH=/etc
 DRCOM_ORIGIN=latest-wired.py
 DRCOM=drcom
 DRCOM_PATH=/usr/bin
@@ -8,13 +9,18 @@ CONFIG_PATH=/etc
 DRCOMLOG=/var/log/drcom.log
 NETLOG=/var/log/networkChecking.log
 DRCOM_PID=/var/run/drcom-wrapper.pid
+VERSION_CQU_DRCOM='2.2.4.2b'
 # for cli options
 # "-" option is to rewrite long options which getopts do not support.
 # ":" behind "-" is to undertake option string value of "-"
 # like "--debug" option, "-" is a short option undertaking "-debug",
 # and "debug" is the actual option handle by getopts
-optspec="-:Vh"
-
+optspec="-:Vcvh"
+# - for long flag option
+# V for verbose option
+# c for config changes option
+# h for help option
+# v for version option
 
 if [ ! -f "/etc/os-release" ];then
     echo "Recheck your package. You cannot run this script."
@@ -378,15 +384,15 @@ setup_drcom() {
     #setup drcom
     echo "Setting up Dr.com..."
     case $campus in
-        "a")
-            echo "c2VydmVyID0gJzIwMi4yMDIuMC4xODAnCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCkNPTlRST0xDSEVDS1NUQVRVUyA9ICdceDIwJwpBREFQVEVSTlVNID0gJ1x4MDUnCmhvc3RfaXAgPSAnMTcyLjI0LjE1Mi44MScKSVBET0cgPSAnXHgwMScKaG9zdF9uYW1lID0gJ0dJTElHSUxJRVlFJwpQUklNQVJZX0ROUyA9ICcyMDIuMjAyLjAuMzMnCmRoY3Bfc2VydmVyID0gJzIwMi4yMDIuMi41MCcKQVVUSF9WRVJTSU9OID0gJ1x4MmZceDAwJwptYWMgPSAweDJjNjAwY2U4YzNjYgpob3N0X29zID0gJ05PVEU3JwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkY1x4MDInCnJvcl92ZXJzaW9uID0gRmFsc2UK" | base64 -d > $CONFIG
-            ;;
-        "b")
-            echo "c2VydmVyID0gJzIwMi4yMDIuMC4xNjMnCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCkNPTlRST0xDSEVDS1NUQVRVUyA9ICdceDIwJwpBREFQVEVSTlVNID0gJ1x4MDYnCmhvc3RfaXAgPSAnMTcyLjI1LjE1NC45NCcKSVBET0cgPSAnXHgwMScKaG9zdF9uYW1lID0gJ0dJTElHSUxJRVlFJwpQUklNQVJZX0ROUyA9ICc4LjguOC44JwpkaGNwX3NlcnZlciA9ICcxMC4xMC43LjY2JwpBVVRIX1ZFUlNJT04gPSAnXHgyNVx4MDAnCm1hYyA9IDB4MTA3ZDFhMWYwNzliCmhvc3Rfb3MgPSAnTk9URTIwJwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkOFx4MDInCnJvcl92ZXJzaW9uID0gRmFsc2UK" |base64 -d > $CONFIG
-            ;;
-        "d")
-            echo "c2VydmVyID0gIjEwLjI1NC43LjQiCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCmhvc3RfbmFtZSA9ICJHSUxJR0lMSUVZRSIKaG9zdF9vcyA9ICJOT1RFNyIKaG9zdF9pcCA9ICIxMC4yMzAuNTkuMjUxIgpQUklNQVJZX0ROUyA9ICIyMDIuMjAyLjAuMzMiCmRoY3Bfc2VydmVyID0gIjEwLjIzMC41OS4yIgptYWMgPSAweGI4ODhlMzA1MTY4MApDT05UUk9MQ0hFQ0tTVEFUVVMgPSAnXHgwMCcKQURBUFRFUk5VTSA9ICdceDAwJwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkY1x4MDInCicnJwpBVVRIX1ZFUlNJT046CiAgICB1bnNpZ25lZCBjaGFyIENsaWVudFZlckluZm9BbmRJbnRlcm5ldE1vZGU7CiAgICB1bnNpZ25lZCBjaGFyIERvZ1ZlcnNpb247CicnJwpBVVRIX1ZFUlNJT04gPSAnXHgyZlx4MDAnCklQRE9HID0gJ1x4MDEnCnJvcl92ZXJzaW9uID0gRmFsc2UKCg==" | base64 -d > $CONFIG
-            ;;
+    "a")
+        echo "c2VydmVyID0gJzIwMi4yMDIuMC4xODAnCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCkNPTlRST0xDSEVDS1NUQVRVUyA9ICdceDIwJwpBREFQVEVSTlVNID0gJ1x4MDUnCmhvc3RfaXAgPSAnMTcyLjI0LjE1Mi44MScKSVBET0cgPSAnXHgwMScKaG9zdF9uYW1lID0gJ0dJTElHSUxJRVlFJwpQUklNQVJZX0ROUyA9ICcyMDIuMjAyLjAuMzMnCmRoY3Bfc2VydmVyID0gJzIwMi4yMDIuMi41MCcKQVVUSF9WRVJTSU9OID0gJ1x4MmZceDAwJwptYWMgPSAweDJjNjAwY2U4YzNjYgpob3N0X29zID0gJ05PVEU3JwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkY1x4MDInCnJvcl92ZXJzaW9uID0gRmFsc2UK" | base64 -d > $CONFIG
+        ;;
+    "b")
+        echo "c2VydmVyID0gJzIwMi4yMDIuMC4xNjMnCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCkNPTlRST0xDSEVDS1NUQVRVUyA9ICdceDIwJwpBREFQVEVSTlVNID0gJ1x4MDYnCmhvc3RfaXAgPSAnMTcyLjI1LjE1NC45NCcKSVBET0cgPSAnXHgwMScKaG9zdF9uYW1lID0gJ0dJTElHSUxJRVlFJwpQUklNQVJZX0ROUyA9ICc4LjguOC44JwpkaGNwX3NlcnZlciA9ICcxMC4xMC43LjY2JwpBVVRIX1ZFUlNJT04gPSAnXHgyNVx4MDAnCm1hYyA9IDB4MTA3ZDFhMWYwNzliCmhvc3Rfb3MgPSAnTk9URTIwJwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkOFx4MDInCnJvcl92ZXJzaW9uID0gRmFsc2UK" |base64 -d > $CONFIG
+        ;;
+    "d")
+        echo "c2VydmVyID0gIjEwLjI1NC43LjQiCnVzZXJuYW1lPScnCnBhc3N3b3JkPScnCmhvc3RfbmFtZSA9ICJHSUxJR0lMSUVZRSIKaG9zdF9vcyA9ICJOT1RFNyIKaG9zdF9pcCA9ICIxMC4yMzAuNTkuMjUxIgpQUklNQVJZX0ROUyA9ICIyMDIuMjAyLjAuMzMiCmRoY3Bfc2VydmVyID0gIjEwLjIzMC41OS4yIgptYWMgPSAweGI4ODhlMzA1MTY4MApDT05UUk9MQ0hFQ0tTVEFUVVMgPSAnXHgwMCcKQURBUFRFUk5VTSA9ICdceDAwJwpLRUVQX0FMSVZFX1ZFUlNJT04gPSAnXHhkY1x4MDInCicnJwpBVVRIX1ZFUlNJT046CiAgICB1bnNpZ25lZCBjaGFyIENsaWVudFZlckluZm9BbmRJbnRlcm5ldE1vZGU7CiAgICB1bnNpZ25lZCBjaGFyIERvZ1ZlcnNpb247CicnJwpBVVRIX1ZFUlNJT04gPSAnXHgyZlx4MDAnCklQRE9HID0gJ1x4MDEnCnJvcl92ZXJzaW9uID0gRmFsc2UKCg==" | base64 -d > $CONFIG
+        ;;
     esac
     cp $DRCOM_ORIGIN $DRCOM #to avoid drcom not found
     sed -i "s/username=''/username=\'$username\'/g" $CONFIG
@@ -506,7 +512,7 @@ setup_crontab() {
     esac
 }
 
-#setup wireless interface
+# setup wireless interface
 setup_wlan() {
     case $ifChange in
         Y|y|"")
@@ -559,6 +565,27 @@ setup_done_debug() {
     uname -a
     echo $distro
     cat /etc/os-release
+}
+
+# for end for process bar
+spin() {
+		sp='/-\|'
+		printf ' '
+		while true; do
+				printf '\b%.1s' "$sp"
+				sp=${sp#?}${sp%???}
+				sleep 0
+		done
+
+}
+
+# process bar
+progressbar()
+{
+       bar="##################################################"
+       barlength=${#bar}
+       n=$(($1*barlength/100))
+       printf "\r[%-${barlength}s (%d%%)] " "${bar:0:n}" "$1"
 }
 
 # Handle actions without options
