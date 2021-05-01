@@ -69,6 +69,9 @@ def log(*args, **kwargs):
     if DEBUG:
         with open(LOG_PATH,'a') as f:
             f.write(s + '\n')
+    if 'bcecb2e2b7a2cfd6203320b4ce2c203320b4cebaf3b4a6c0ed' in s:
+        log('[auto-relogin] Need to relogin now, or will be kicked!')
+        sys.exit(1)
 
 def challenge(svr,ran):
     while True:
