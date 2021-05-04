@@ -9,6 +9,7 @@ import sys
 import os
 import random
 import traceback
+import re
 
 keep_alive1_mod = False #If you have trouble at KEEPALIVE1, turn this value to True
 nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
@@ -61,6 +62,7 @@ LOG_PATH = '/var/log/drcom_client.log'
 if IS_TEST:
     DEBUG = True
     LOG_PATH = 'drcom_client.log'
+regex = re.compile('bcecb2e2b7a2cfd620((3[0-9])+)20b4ce2c20((3[0-9])+)20b4cebaf3b4a6c0ed')
 
 
 def log(*args, **kwargs):
@@ -69,6 +71,10 @@ def log(*args, **kwargs):
     if DEBUG:
         with open(LOG_PATH,'a') as f:
             f.write(s + '\n')
+    kicking_search = regex.search(s)
+    if kicking_search and kicking_search.group(1) == kicking_search.group(3):
+        log('[auto-relogin] Need to relogin now, or will be kicked!')
+        sys.exit(1)
 
 def challenge(svr,ran):
     while True:
