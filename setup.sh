@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/sh
 # shellcheck shell=ash
 CONFIG=drcom.conf
 CONFIG_PATH=/etc
@@ -9,18 +9,21 @@ CONFIG_PATH=/etc
 DRCOMLOG=/var/log/drcom.log
 NETLOG=/var/log/networkChecking.log
 DRCOM_PID=/var/run/drcom-wrapper.pid
-VERSION_CQU_DRCOM='2.2.4.2b'
+ERROR_LOG=/var/log/install-error.log
+VERSION_CQU_DRCOM='2.3a'
+
 # for cli options
 # "-" option is to rewrite long options which getopts do not support.
 # ":" behind "-" is to undertake option string value of "-"
 # like "--debug" option, "-" is a short option undertaking "-debug",
 # and "debug" is the actual option handle by getopts
-optspec="-:Vcvh"
+optspec="-:Vcvhf"
 # - for long flag option
 # V for verbose option
 # c for config changes option
 # h for help option
 # v for version option
+# f for config file option
 
 if [ ! -f "/etc/os-release" ];then
     echo "Recheck your package. You cannot run this script."
@@ -37,6 +40,7 @@ echo() { printf '%s\n' "$*" ; }
 
 # hello mates
 hello() {
+    clear
     echo "======================================"
     echo "Welcome to CQU_drcom setup script."
     echo "======================================"
@@ -147,7 +151,7 @@ inform_gather() {
             ifSet_cron=no;;
     esac
 
-    
+
 }
 
 client_setting() {
@@ -254,7 +258,7 @@ recheck() {
     echo "Change WIFI password:"
     echo $ifChange
     echo "DrCOM client:"
-    echo "the $CLIENT version"
+    echo "$CLIENT version"
 
     case $ifChange in
         Y|y|"")
@@ -401,17 +405,6 @@ setup_drcom() {
     #set up startup service
     echo "Setting up startup service..."
     case $distro in
-        "pandorabox")
-            echo '#!/bin/sh
-            # /etc/hotplug.d/iface/99-drcom
-            if [ "$ACTION" = ifup ]; then
-                if [ "${INTERFACE}" = "wan" ]; then
-                    sleep 10 && /usr/bin/drcom >' "'$DRCOMLOG'" '&
-            fi
-            fi' > 99-drcom
-            chmod a+x 99-drcom
-            cp -p 99-drcom /etc/hotplug.d/iface/ ;;
-
         "openwrt")
             echo '#!/bin/sh /etc/rc.common
             START=99
@@ -567,25 +560,32 @@ setup_done_debug() {
     cat /etc/os-release
 }
 
-# for end for process bar
-spin() {
-		sp='/-\|'
-		printf ' '
-		while true; do
-				printf '\b%.1s' "$sp"
-				sp=${sp#?}${sp%???}
-				sleep 0
-		done
+config_file_check() {
+    CLIENT=$client
+    ifSet_cron=$set_cron
+    if ! [[ $campus = "a" || $campus = "b" || $campus = "d" ]]
+    then
+        echo "Error, value campus with  $campus is not allowed. Please check ."
+	echo "Error, value campus with  $campus is not allowed. Please check ." >> $ERROR_LOG
+        exit
+    fi
+    
+    if [[ $wifi_ssid0 -eq 0 ]]
+    then
+        wifi_ssid0="openwrt"
+    fi
+    if [[ $wifi_ssid1 -eq 0 ]]
+    then
+        wifi_ssid0="openwrt_5Ghz"
+    fi
+    if ! [[ $CLIENT = "python2" || $CLIENT = "micropy" ]]; then
+        echo "Error, value client with $CLIENT is not allowed. Please check."
+	echo "Error, value client with $CLIENT is not allowed. Please check." >> $ERROR_LOG
+        exit
+    fi
 
-}
+    
 
-# process bar
-progressbar()
-{
-       bar="##################################################"
-       barlength=${#bar}
-       n=$(($1*barlength/100))
-       printf "\r[%-${barlength}s (%d%%)] " "${bar:0:n}" "$1"
 }
 
 # Handle actions without options
@@ -647,11 +647,24 @@ else # When running with options
                         setup_confirm
                         setup_done_debug
                         ;;
+                    file)
+                        while read line;do
+                            eval "$line"
+                        done < config.ini
+                        hello
+                        clean_up
+                        setup_packages
+                        setup_drcom
+                        setup_crontab
+                        setup_wlan
+                        setup_done
+                        ;;
                     help)
                         echo ""
                         echo "USAGE: sh ./setup.sh [options]"
                         echo ""
                         echo "-V, --dry-run		Verbose. Run the scripts without actually setting up."
+                        echo "-f, --file            Use config file to install automatically"
                         echo "-h, --help			Display this message."
                         ;;
                 esac
@@ -672,7 +685,23 @@ else # When running with options
             h)
                 echo "USAGE: sh ./setup.sh [options]"
                 echo "-V, --dry-run			Verbose. Run the scripts without actually setting up."
+                echo "-f, --file            Use config file to install automatically"
                 echo "-h, --help				Display this message."
+                ;;
+            f)
+                while read line;do
+                    eval "$line"
+                done < config.ini
+                hello
+                config_file_check
+                clean_up
+                setup_packages
+                setup_drcom
+                setup_crontab
+                setup_wlan
+                setup_done
+#                 config_file_check
+#                 setup_done_debug
                 ;;
             *)
                 if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
