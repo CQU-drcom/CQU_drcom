@@ -49,6 +49,22 @@ sh setup.sh
 1. 此脚本存在网路连接的不确定性：即因为需要检测网络连通情况所以需要 ping 一下内网中某服务器，但是由于内网的不确定性目前不能保证每次都成功
 2. 学校更新了配置文件：请重新抓包，或等待我们将新配置文件上传
 
+## 静默安装
+本脚本支持静默安装，请参照 `config.ini.example` 创建文件 `config.ini` 并填入必要信息。说明如下：
+```bash
+campus= #校区，可选值为 a,b,d
+username= #用户名
+password= #密码
+wifi_ssid0= #多频段下 SSID 名称，缺省为 openwrt
+wifi_ssid1= #多频段下 SSID 名称，缺省为 openwrt_5Ghz
+client= #客户端选择，无缺省值，可选项为 python2,micropy
+wifi_password0= #多频段下 WLAN 密码，缺省为空
+wifi_password1= #多频段下 WLAN 密码，缺省为空
+set_cron= #crontab 设置，缺省为 no, 可选值为 yes,no
+```
+使用 `sh setup.sh -h` 查看帮助内容，使用 `-f` 选择配置文件。
+
+
 ## F&Q
 - - Q: 为什么我无法连接重大开源镜像站？（请检测网络连通性）
   - A: 请检查网线、网络端口是否正常。如正常请考虑你是否处在办公区域，这些区域需要使用分配的网络配置进行初步的联网

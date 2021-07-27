@@ -10,7 +10,7 @@ DRCOMLOG=/var/log/drcom.log
 NETLOG=/var/log/networkChecking.log
 DRCOM_PID=/var/run/drcom-wrapper.pid
 ERROR_LOG=/var/log/install-error.log
-VERSION_CQU_DRCOM='2.3a'
+VERSION_CQU_DRCOM='2.3.1b'
 
 # for cli options
 # "-" option is to rewrite long options which getopts do not support.
@@ -563,6 +563,11 @@ setup_done_debug() {
 config_file_check() {
     CLIENT=$client
     ifSet_cron=$set_cron
+    if [[ $ifSet_cron -eq 0 ]]
+    then
+        ifSet_cron=no
+    fi
+    
     if ! [[ $campus = "a" || $campus = "b" || $campus = "d" ]]
     then
         echo "Error, value campus with  $campus is not allowed. Please check ."
