@@ -9,6 +9,7 @@ CONFIG_PATH=/etc
 DRCOMLOG=/var/log/drcom.log
 NETLOG=/var/log/networkChecking.log
 DRCOM_PID=/var/run/drcom-wrapper.pid
+ERROR_LOG=/var/log/install-error.log
 VERSION_CQU_DRCOM='2.3a'
 
 # for cli options
@@ -565,6 +566,7 @@ config_file_check() {
     if ! [[ $campus = "a" || $campus = "b" || $campus = "d" ]]
     then
         echo "Error, value campus with  $campus is not allowed. Please check ."
+	echo "Error, value campus with  $campus is not allowed. Please check ." >> $ERROR_LOG
         exit
     fi
     
@@ -578,6 +580,7 @@ config_file_check() {
     fi
     if ! [[ $CLIENT = "python2" || $CLIENT = "micropy" ]]; then
         echo "Error, value client with $CLIENT is not allowed. Please check."
+	echo "Error, value client with $CLIENT is not allowed. Please check." >> $ERROR_LOG
         exit
     fi
 
@@ -688,7 +691,7 @@ else # When running with options
             f)
                 while read line;do
                     eval "$line"
-                done < config.ini.example
+                done < config.ini
                 hello
                 config_file_check
                 clean_up
