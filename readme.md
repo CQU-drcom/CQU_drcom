@@ -19,7 +19,7 @@
 | Linux 或 FreeBSD 等|默认终端模拟器（确保安装了 openssh ）|
 
 具体使用方法如下：
-1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.2.4.1b)，并解压
+1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.3.1b)，并解压
 2. 将配置包上传至路由器空间：
  - Windows：使用 Winscp 工具登录路由器并将 `setup.sh` 和 `latest-wired.py` 拖入文件夹 `/root/`
  - 配置了 openssh-beta 的 Windows 或者 Mac OS 以及 Linux：
@@ -48,6 +48,22 @@ sh setup.sh
 ## **特殊说明**
 1. 此脚本存在网路连接的不确定性：即因为需要检测网络连通情况所以需要 ping 一下内网中某服务器，但是由于内网的不确定性目前不能保证每次都成功
 2. 学校更新了配置文件：请重新抓包，或等待我们将新配置文件上传
+
+## 静默安装
+本脚本支持静默安装，请参照 `config.ini.example` 创建文件 `config.ini` 并填入必要信息。说明如下：
+```bash
+campus= #校区，可选值为 a,b,d
+username= #用户名
+password= #密码
+wifi_ssid0= #多频段下 SSID 名称，缺省为 openwrt
+wifi_ssid1= #多频段下 SSID 名称，缺省为 openwrt_5Ghz
+client= #客户端选择，无缺省值，可选项为 python2,micropy
+wifi_password0= #多频段下 WLAN 密码，缺省为空
+wifi_password1= #多频段下 WLAN 密码，缺省为空
+set_cron= #crontab 设置，缺省为 no, 可选值为 yes,no
+```
+使用 `sh setup.sh -h` 查看帮助内容，使用 `-f` 选择配置文件。
+
 
 ## F&Q
 - - Q: 为什么我无法连接重大开源镜像站？（请检测网络连通性）
