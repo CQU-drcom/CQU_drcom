@@ -19,7 +19,7 @@
 | Linux 或 FreeBSD 等|默认终端模拟器（确保安装了 openssh ）|
 
 具体使用方法如下：
-1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.3.1b)，并解压
+1. 在[RELEASE](https://github.com/purefkh/CQU_drcom/releases)中下载[此配置包](https://github.com/purefkh/CQU_drcom/releases/tag/v2.3.2b)，并解压
 2. 将配置包上传至路由器空间：
  - Windows：使用 Winscp 工具登录路由器并将 `setup.sh` 和 `latest-wired.py` 拖入文件夹 `/root/`
  - 配置了 openssh-beta 的 Windows 或者 Mac OS 以及 Linux：
