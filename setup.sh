@@ -561,20 +561,19 @@ setup_done_debug() {
 }
 
 config_file_check() {
-    CLIENT=$client
-    ifSet_cron=$set_cron
+    CLIENT="$client"
+    ifSet_cron="$set_cron"
     if ! [[ $campus = "a" || $campus = "b" || $campus = "d" ]]
     then
         echo "Error, value campus with  $campus is not allowed. Please check ."
 	echo "Error, value campus with  $campus is not allowed. Please check ." >> $ERROR_LOG
         exit
     fi
-    
-    if [[ $wifi_ssid0 -eq 0 ]]
+    if [ -z "$wifi_ssid0" ];
     then
         wifi_ssid0="openwrt"
     fi
-    if [[ $wifi_ssid1 -eq 0 ]]
+    if [ -z "$wifi_ssid1" ];
     then
         wifi_ssid0="openwrt_5Ghz"
     fi
@@ -584,7 +583,7 @@ config_file_check() {
         exit
     fi
 
-    
+
 
 }
 
@@ -652,6 +651,7 @@ else # When running with options
                             eval "$line"
                         done < config.ini
                         hello
+                        config_file_check
                         clean_up
                         setup_packages
                         setup_drcom
@@ -684,6 +684,7 @@ else # When running with options
                 ;;
             h)
                 echo "USAGE: sh ./setup.sh [options]"
+                echo ""
                 echo "-V, --dry-run			Verbose. Run the scripts without actually setting up."
                 echo "-f, --file            Use config file to install automatically"
                 echo "-h, --help				Display this message."
