@@ -10,7 +10,7 @@ DRCOMLOG=/var/log/drcom.log
 NETLOG=/var/log/networkChecking.log
 DRCOM_PID=/var/run/drcom-wrapper.pid
 ERROR_LOG=/var/log/install-error.log
-VERSION_CQU_DRCOM='2.3.1b'
+VERSION_CQU_DRCOM='2.3.2b'
 
 # for cli options
 # "-" option is to rewrite long options which getopts do not support.
@@ -561,8 +561,8 @@ setup_done_debug() {
 }
 
 config_file_check() {
-    CLIENT=$client
-    ifSet_cron=$set_cron
+    CLIENT="$client"
+    ifSet_cron="$set_cron"
     if [[ $ifSet_cron -eq 0 ]]
     then
         ifSet_cron=no
@@ -574,12 +574,12 @@ config_file_check() {
 	echo "Error, value campus with  $campus is not allowed. Please check ." >> $ERROR_LOG
         exit
     fi
-    
-    if [[ $wifi_ssid0 -eq 0 ]]
+
+    if [ -z "$wifi_ssid0" ];
     then
         wifi_ssid0="openwrt"
     fi
-    if [[ $wifi_ssid1 -eq 0 ]]
+    if [ -z "$wifi_ssid1" ];
     then
         wifi_ssid0="openwrt_5Ghz"
     fi
@@ -589,7 +589,7 @@ config_file_check() {
         exit
     fi
 
-    
+
 
 }
 
@@ -657,6 +657,8 @@ else # When running with options
                             eval "$line"
                         done < config.ini
                         hello
+                        config_file_check
+
                         clean_up
                         setup_packages
                         setup_drcom
@@ -689,6 +691,7 @@ else # When running with options
                 ;;
             h)
                 echo "USAGE: sh ./setup.sh [options]"
+                echo ""
                 echo "-V, --dry-run			Verbose. Run the scripts without actually setting up."
                 echo "-f, --file            Use config file to install automatically"
                 echo "-h, --help				Display this message."
